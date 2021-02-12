@@ -1,0 +1,36 @@
+PODS:
+  - Alamofire (5.4.1)
+  - OHHTTPStubs/Core (9.1.0)
+  - OHHTTPStubs/Default (9.1.0):
+    - OHHTTPStubs/Core
+    - OHHTTPStubs/JSON
+    - OHHTTPStubs/NSURLSession
+    - OHHTTPStubs/OHPathHelpers
+  - OHHTTPStubs/JSON (9.1.0):
+    - OHHTTPStubs/Core
+  - OHHTTPStubs/NSURLSession (9.1.0):
+    - OHHTTPStubs/Core
+  - OHHTTPStubs/OHPathHelpers (9.1.0)
+  - OHHTTPStubs/Swift (9.1.0):
+    - OHHTTPStubs/Default
+  - Swinject (2.7.1)
+
+DEPENDENCIES:
+  - Alamofire
+  - OHHTTPStubs/Swift
+  - Swinject
+
+SPEC REPOS:
+  trunk:
+    - Alamofire
+    - OHHTTPStubs
+    - Swinject
+
+SPEC CHECKSUMS:
+  Alamofire: 2291f7d21ca607c491dd17642e5d40fdcda0e65c
+  OHHTTPStubs: 90eac6d8f2c18317baeca36698523dc67c513831
+  Swinject: ddf78b8486dd9b71a667b852cad919ab4484478e
+
+PODFILE CHECKSUM: 5e84a817c4ee62ddd4208ec8d286741d0daee4df
+
+COCOAPODS: 1.10.0
