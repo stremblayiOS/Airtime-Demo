@@ -9,37 +9,13 @@ import UIKit
 
 final class TabbarViewController: UITabBarController {
 
-//    private let databaseService: DatabaseServiceProtocol // Wrong
-
     private let dataAccessService: DataAccessServiceProtocol
-
-//    init(databaseService: DatabaseServiceProtocol) {
-//        self.databaseService = databaseService
-//        super.init(nibName: nil, bundle: nil)
-//
-//        databaseService.deleteAllData()
-//
-//        let room: Room = databaseService.managedObject(with: Room.self)
-//        room.name = UUID().uuidString
-//        room.isLive = Bool.random()
-//
-//        databaseService.save()
-//    }
 
     init(dataAccessService: DataAccessServiceProtocol) {
         self.dataAccessService = dataAccessService
         super.init(nibName: nil, bundle: nil)
 
-        // 1. Start on a clean state
-        dataAccessService.deleteObject(request: RoomDataAccessRequest.deleteAllRooms, nil)
-
-        // 2. Create the object and set paramaters
-        let room = dataAccessService.createObject(Room.self)
-        room.name = UUID().uuidString
-        room.isLive = Bool.random()
-
-        // 3. Save object
-        dataAccessService.saveObject<Room>(request: RoomDataAccessRequest.create(room: room), nil)
+        createRoom()
     }
 
     required init?(coder: NSCoder) {
@@ -53,5 +29,25 @@ final class TabbarViewController: UITabBarController {
         let myRoomsLiveViewController = ServiceFactory.resolve(serviceType: MyRoomsLiveViewController.self)
 
         viewControllers = [myRoomsViewController, myRoomsLiveViewController]
+    }
+}
+
+private extension TabbarViewController {
+
+    func deleteAllRooms() {
+        dataAccessService.deleteObject(request: RoomDataAccessRequest.deleteAllRooms, nil)
+    }
+
+    func createRoom() {
+        // 1. Create the object and set paramaters
+        let room = dataAccessService.createObject(Room.self)
+        room.name = UUID().uuidString
+        room.isLive = Bool.random()
+
+        // 2. Create the request
+        let request = RoomDataAccessRequest.create(room: room)
+
+        // 3. Save object
+        dataAccessService.saveObject(request: request, nil)
     }
 }
