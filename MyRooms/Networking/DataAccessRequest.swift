@@ -17,4 +17,5 @@ public typealias LocalRequest = (object: Object?, id: String?, filter: NSPredica
 public protocol DataAccessRequest {
     var remoteRequest: RemoteRequest? { get }
     var localRequest: LocalRequest? { get }
+    var type: Object.Type { get }
 }
