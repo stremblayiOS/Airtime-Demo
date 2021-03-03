@@ -19,14 +19,14 @@
 		22295DBA25D6BA06000FBA25 /* ServiceFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22295DAD25D6BA06000FBA25 /* ServiceFactory.swift */; };
 		22295DBB25D6BA06000FBA25 /* DatabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22295DAE25D6BA06000FBA25 /* DatabaseService.swift */; };
 		22295DBC25D6BA06000FBA25 /* Bootstrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22295DAF25D6BA06000FBA25 /* Bootstrapper.swift */; };
-		22295DBE25D6BA06000FBA25 /* DataAccessRequestConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22295DB225D6BA06000FBA25 /* DataAccessRequestConvertible.swift */; };
+		22295DBE25D6BA06000FBA25 /* DataAccessRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22295DB225D6BA06000FBA25 /* DataAccessRequest.swift */; };
 		22295DC125D6BA06000FBA25 /* RouterProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22295DB525D6BA06000FBA25 /* RouterProtocol.swift */; };
 		2229821625D6DEA900B17A34 /* TabbarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2229821525D6DEA900B17A34 /* TabbarViewController.swift */; };
 		2229821925D6DEF000B17A34 /* MyRoomsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2229821825D6DEF000B17A34 /* MyRoomsViewController.swift */; };
 		2229821C25D6DEFE00B17A34 /* MyRoomsLiveViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2229821B25D6DEFE00B17A34 /* MyRoomsLiveViewController.swift */; };
 		2229826925D6FAEE00B17A34 /* Room+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2229826725D6FAEE00B17A34 /* Room+CoreDataClass.swift */; };
 		2229826A25D6FAEE00B17A34 /* Room+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2229826825D6FAEE00B17A34 /* Room+CoreDataProperties.swift */; };
-		2282148E25D6CDC400A509FD /* RoomDataAccessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2282148D25D6CDC400A509FD /* RoomDataAccessor.swift */; };
+		2282148E25D6CDC400A509FD /* RoomDataAccessRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2282148D25D6CDC400A509FD /* RoomDataAccessRequest.swift */; };
 		2282149225D6CE0B00A509FD /* RoomRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2282149125D6CE0B00A509FD /* RoomRouter.swift */; };
 		2284AD4425DC0FE7005EE4AD /* DataAccessError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2284AD4325DC0FE7005EE4AD /* DataAccessError.swift */; };
 		2284AD9125E04257005EE4AD /* NSManagedObjectContext+Publisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2284AD9025E04257005EE4AD /* NSManagedObjectContext+Publisher.swift */; };
@@ -48,14 +48,14 @@
 		22295DAD25D6BA06000FBA25 /* ServiceFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServiceFactory.swift; sourceTree = "<group>"; };
 		22295DAE25D6BA06000FBA25 /* DatabaseService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DatabaseService.swift; sourceTree = "<group>"; };
 		22295DAF25D6BA06000FBA25 /* Bootstrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bootstrapper.swift; sourceTree = "<group>"; };
-		22295DB225D6BA06000FBA25 /* DataAccessRequestConvertible.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataAccessRequestConvertible.swift; sourceTree = "<group>"; };
+		22295DB225D6BA06000FBA25 /* DataAccessRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataAccessRequest.swift; sourceTree = "<group>"; };
 		22295DB525D6BA06000FBA25 /* RouterProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RouterProtocol.swift; sourceTree = "<group>"; };
 		2229821525D6DEA900B17A34 /* TabbarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabbarViewController.swift; sourceTree = "<group>"; };
 		2229821825D6DEF000B17A34 /* MyRoomsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRoomsViewController.swift; sourceTree = "<group>"; };
 		2229821B25D6DEFE00B17A34 /* MyRoomsLiveViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRoomsLiveViewController.swift; sourceTree = "<group>"; };
 		2229826725D6FAEE00B17A34 /* Room+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Room+CoreDataClass.swift"; sourceTree = "<group>"; };
 		2229826825D6FAEE00B17A34 /* Room+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Room+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		2282148D25D6CDC400A509FD /* RoomDataAccessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomDataAccessor.swift; sourceTree = "<group>"; };
+		2282148D25D6CDC400A509FD /* RoomDataAccessRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomDataAccessRequest.swift; sourceTree = "<group>"; };
 		2282149125D6CE0B00A509FD /* RoomRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomRouter.swift; sourceTree = "<group>"; };
 		2284AD4325DC0FE7005EE4AD /* DataAccessError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataAccessError.swift; sourceTree = "<group>"; };
 		2284AD9025E04257005EE4AD /* NSManagedObjectContext+Publisher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSManagedObjectContext+Publisher.swift"; sourceTree = "<group>"; };
@@ -147,9 +147,9 @@
 		22295DB025D6BA06000FBA25 /* Networking */ = {
 			isa = PBXGroup;
 			children = (
-				2282148D25D6CDC400A509FD /* RoomDataAccessor.swift */,
+				2282148D25D6CDC400A509FD /* RoomDataAccessRequest.swift */,
 				2282149125D6CE0B00A509FD /* RoomRouter.swift */,
-				22295DB225D6BA06000FBA25 /* DataAccessRequestConvertible.swift */,
+				22295DB225D6BA06000FBA25 /* DataAccessRequest.swift */,
 				22295DB525D6BA06000FBA25 /* RouterProtocol.swift */,
 			);
 			path = Networking;
@@ -305,7 +305,7 @@
 				22295D9725D6B69F000FBA25 /* MyRooms.xcdatamodeld in Sources */,
 				22295DBB25D6BA06000FBA25 /* DatabaseService.swift in Sources */,
 				2229821625D6DEA900B17A34 /* TabbarViewController.swift in Sources */,
-				22295DBE25D6BA06000FBA25 /* DataAccessRequestConvertible.swift in Sources */,
+				22295DBE25D6BA06000FBA25 /* DataAccessRequest.swift in Sources */,
 				2229826925D6FAEE00B17A34 /* Room+CoreDataClass.swift in Sources */,
 				22295DBC25D6BA06000FBA25 /* Bootstrapper.swift in Sources */,
 				2229826A25D6FAEE00B17A34 /* Room+CoreDataProperties.swift in Sources */,
@@ -315,7 +315,7 @@
 				2229821C25D6DEFE00B17A34 /* MyRoomsLiveViewController.swift in Sources */,
 				22295DB925D6BA06000FBA25 /* DataAccessService.swift in Sources */,
 				22295DBA25D6BA06000FBA25 /* ServiceFactory.swift in Sources */,
-				2282148E25D6CDC400A509FD /* RoomDataAccessor.swift in Sources */,
+				2282148E25D6CDC400A509FD /* RoomDataAccessRequest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

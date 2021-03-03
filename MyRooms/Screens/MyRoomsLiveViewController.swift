@@ -33,7 +33,7 @@ final class MyRoomsLiveViewController: UITableViewController {
 
         setup()
 
-        dataAccessService.getObjects(request: RoomDataAccessor.myRoomsLive) { [weak self] (result: Result<[Room], DataAccessError>) in
+        dataAccessService.getObjects(request: RoomDataAccessRequest.myRoomsLive) { [weak self] (result: Result<[Room], DataAccessError>) in
             switch result {
             case .success(let objects):
                 self?.rooms = objects

@@ -31,15 +31,15 @@ final class TabbarViewController: UITabBarController {
         super.init(nibName: nil, bundle: nil)
 
         // 1. Start on a clean state
-        dataAccessService.deleteObject(request: RoomDataAccessor.deleteAllRooms, nil)
+        dataAccessService.deleteObject(request: RoomDataAccessRequest.deleteAllRooms, nil)
 
         // 2. Create the object and set paramaters
-        let room = Room()
+        let room = dataAccessService.createObject(Room.self)
         room.name = UUID().uuidString
         room.isLive = Bool.random()
 
         // 3. Save object
-        dataAccessService.saveObject(request: RoomDataAccessor.create(room: room), nil)
+        dataAccessService.saveObject<Room>(request: RoomDataAccessRequest.create(room: room), nil)
     }
 
     required init?(coder: NSCoder) {

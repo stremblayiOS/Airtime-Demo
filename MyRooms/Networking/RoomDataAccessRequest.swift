@@ -7,13 +7,13 @@
 
 import CoreData
 
-enum RoomDataAccessor: DataAccessRequestConvertible {
+enum RoomDataAccessRequest: DataAccessRequest {
     case myRooms
     case myRoomsLive
     case deleteAllRooms
     case create(room: Room)
 
-    var remoteDataAccessor: RemoteDataAccessor {
+    var remoteRequest: RemoteRequest? {
         switch self {
         case .myRooms:
             return RoomRouter.rooms
@@ -26,7 +26,7 @@ enum RoomDataAccessor: DataAccessRequestConvertible {
         }
     }
 
-    var localDataAccessor: LocalDataAccessor {
+    var localRequest: LocalRequest? {
         switch self {
         case .myRooms:
             return (object: nil, id: nil, filter: nil, propertySortKey: nil, ascending: true)
@@ -36,16 +36,6 @@ enum RoomDataAccessor: DataAccessRequestConvertible {
             return (object: nil, id: nil, filter: nil, propertySortKey: nil, ascending: true)
         case .create(let room):
             return (object: room, id: nil, filter: nil, propertySortKey: nil, ascending: true)
-        }
-    }
-
-    // Ignore: Experimental
-    var storageLocation: StorageLocation {
-        switch self {
-        case .create:
-            return .localOnly
-        default:
-            return .both
         }
     }
 }

@@ -12,33 +12,42 @@ import Combine
 /// Service protocol definition
 protocol DataAccessServiceProtocol {
 
+    /// Create an instance of NSManagedObject along with the desired managed context
+    /// Warning: It doesn't save the object. You may want to call this to prepare a `DataAccessor` for `func saveObject()`
+    ///
+    /// - Parameters:
+    ///   - type: The type of the managed object you want to create
+    ///
+    /// - Returns: A newly created instance ready be saved
+    func createObject<T: Object>(_ type: T.Type) -> T
+
     /// Generic funtion to retrieve all objects according to the given data accessor request
     ///
     /// - Parameters:
     ///   - request: The data accessor request used to retrieve the objects
     ///   - closure: Callback triggered once the objects have been retrieved. If the objects, did not previously exsist in the local db, they will now have been downloaded and saved into the db
-    func getObjects<T>(request: DataAccessRequestConvertible, _ closure: ((Result<[T], DataAccessError>) -> Void)?) where T: Object
+    func getObjects<T>(request: DataAccessRequest, _ closure: ((Result<[T], DataAccessError>) -> Void)?) where T: Object
 
     /// Generic funtion to retrieve an object according to the given data accessor request
     ///
     /// - Parameters:
     ///   - request: The data accessor request used to retrieve the object
     ///   - closure: Callback triggered once the object has been retrieved. If the object, did not previously exsist in the local db, it will now have been downloaded and saved into the db
-    func getObject<T>(request: DataAccessRequestConvertible, _ closure: ((Result<T, DataAccessError>) -> Void)?) where T: Object
+    func getObject<T>(request: DataAccessRequest, _ closure: ((Result<T, DataAccessError>) -> Void)?) where T: Object
 
     /// Generic funtion to create/update an object according to the given data accessor request
     ///
     /// - Parameters:
     ///   - request: The data accessor request used to create/update the object
     ///   - closure: Callback triggered once the object has been created/updated. If the object, did not previously exsist in the local db, it will now have been saved remotely as well as locally
-    func saveObject<T>(request: DataAccessRequestConvertible, _ closure: ((Result<T, DataAccessError>) -> Void)?) where T: Object
+    func saveObject<T>(request: DataAccessRequest, _ closure: ((Result<T, DataAccessError>) -> Void)?) where T: Object
 
     /// Delete an object according to the given data accessor request
     ///
     /// - Parameters:
     ///   - request: The data accessor request used to create/update the object
     ///   - closure: Callback triggered once the object has been deleted. The object will have been deleted remotely as well locally
-    func deleteObject(request: DataAccessRequestConvertible, _ closure: ((Result<Void, DataAccessError>) -> Void)?)
+    func deleteObject(request: DataAccessRequest, _ closure: ((Result<Void, DataAccessError>) -> Void)?)
 }
 
 final class DataAccessService: DataAccessServiceProtocol {
@@ -51,35 +60,35 @@ final class DataAccessService: DataAccessServiceProtocol {
         self.apiService = apiService
     }
 
-    func getObjects<T>(request: DataAccessRequestConvertible, _ closure: ((Result<[T], DataAccessError>) -> Void)?) where T: Object {
-
-        let result: Result<[T], Error> = databaseService.getObjects(with: request.localDataAccessor)
-
-        switch result {
-        case .success(let objects):
-            closure?(.success(objects))
-        case .failure:
-            closure?(.failure(.database))
-        }
+    func createObject<T: Object>(_ type: T.Type) -> T {
+        databaseService.createObject(type)
     }
 
-    func getObject<T>(request: DataAccessRequestConvertible, _ closure: ((Result<T, DataAccessError>) -> Void)?) where T: Object {
+    func getObjects<T>(request: DataAccessRequest, _ closure: ((Result<[T], DataAccessError>) -> Void)?) where T: Object {
+
+//        if let localRequest = request.local {
+//            let result: Result<[T], Error> = databaseService.getObjects(with: localRequest)
+//
+//            switch result {
+//            case .success(let objects):
+//                closure?(.success(objects))
+//            case .failure:
+//                closure?(.failure(.database))
+//            }
+//        }
+    }
+
+    func getObject<T>(request: DataAccessRequest, _ closure: ((Result<T, DataAccessError>) -> Void)?) where T: Object {
 
     }
 
-    func saveObject<T>(request: DataAccessRequestConvertible, _ closure: ((Result<T, DataAccessError>) -> Void)?) where T: Object {
-
-        if request.storageLocation == .localOnly, let object = request.localDataAccessor.object {
-
+    func saveObject<T>(request: DataAccessRequest, _ closure: ((Result<T, DataAccessError>) -> Void)?) where T: Object {
+        if let localRequest = request.localRequest, let object = localRequest.object {
             databaseService.saveObject(object: object)
-
-//            let encoder = JSONEncoder()
-//            let data = try! encoder.encode(request.localDataAccessor.type)
-//            let parameters = (try? JSONSerialization.jsonObject(with: data, options: .allowFragments)).flatMap { $0 as? [String: Any] }!
         }
     }
 
-    func deleteObject(request: DataAccessRequestConvertible, _ closure: ((Result<Void, DataAccessError>) -> Void)?) {
+    func deleteObject(request: DataAccessRequest, _ closure: ((Result<Void, DataAccessError>) -> Void)?) {
 
     }
 
@@ -103,7 +112,7 @@ final class DataAccessService: DataAccessServiceProtocol {
 //        }.eraseToAnyPublisher()
 //    }
 
-    func getObjects<T>(request: DataAccessRequestConvertible) -> AnyPublisher<[T], DataAccessError> where T: Object {
+    func getObjects<T>(request: DataAccessRequest) -> AnyPublisher<[T], DataAccessError> where T: Object {
 
         let subject = PassthroughSubject<[T], DataAccessError>()
         let publisher = subject.eraseToAnyPublisher()

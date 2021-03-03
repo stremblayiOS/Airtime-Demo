@@ -35,7 +35,7 @@ protocol DatabaseServiceProtocol {
     ///
     /// - Returns: The retrieved results object. If nil, no objects were found
     func getObjects<T: Object>() -> Result<[T], Error>
-    func getObjects<T: Object>(with localDataAccessor: LocalDataAccessor) -> Result<[T], Error>
+//    func getObjects<T: Object>(with localDataAccessor: Local) -> Result<[T], Error>
 
     /// Delete a given object from the db
     ///
@@ -44,7 +44,14 @@ protocol DatabaseServiceProtocol {
 
     func save()
 
-    func managedObject<T: Object>(with type: T.Type) -> T
+    /// Create an instance of NSManagedObject along with the desired managed context
+    /// Warning: It doesn't save the object. You need to call `func save()` for that.
+    ///
+    /// - Parameters:
+    ///   - type: The type of the managed object you want to create
+    ///
+    /// - Returns: A newly created instance ready be saved
+    func createObject<T: Object>(_ type: T.Type) -> T
 
     func deleteAllData()
 }
@@ -75,7 +82,7 @@ final class DatabaseService: DatabaseServiceProtocol {
             .store(in: &subscribers)
     }
 
-    func managedObject<T: Object>(with type: T.Type) -> T {
+    func createObject<T: Object>(_ type: T.Type) -> T {
         T(context: managedContext)
     }
 
@@ -128,18 +135,18 @@ final class DatabaseService: DatabaseServiceProtocol {
         }
     }
 
-    func getObjects<T: Object>(with localDataAccessor: LocalDataAccessor) -> Result<[T], Error> {
-        let fetchRequest = NSFetchRequest<T>(entityName: String(describing: T.self))
-        
-        // Revert this to true on production
-//        fetchRequest.returnsObjectsAsFaults = false
-        fetchRequest.predicate = localDataAccessor.filter
-        do {
-            return .success(try managedContext.fetch(fetchRequest))
-        } catch {
-            return .failure(error)
-        }
-    }
+//    func getObjects<T: Object>(with localDataAccessor: LocalDataAccessor) -> Result<[T], Error> {
+//        let fetchRequest = NSFetchRequest<T>(entityName: String(describing: T.self))
+//        
+//        // Revert this to true on production
+////        fetchRequest.returnsObjectsAsFaults = false
+//        fetchRequest.predicate = localDataAccessor.filter
+//        do {
+//            return .success(try managedContext.fetch(fetchRequest))
+//        } catch {
+//            return .failure(error)
+//        }
+//    }
 
     func deleteObject(object: Object) {
 
