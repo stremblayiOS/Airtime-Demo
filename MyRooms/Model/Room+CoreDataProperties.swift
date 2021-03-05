@@ -16,7 +16,7 @@ extension Room {
         NSFetchRequest<Room>(entityName: String(describing: self))
     }
 
-    @NSManaged public var id: String
+    @NSManaged public var uid: String
     @NSManaged public var isLive: Bool
     @NSManaged public var name: String
 }

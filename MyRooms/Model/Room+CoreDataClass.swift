@@ -12,7 +12,7 @@ import CoreData
 public class Room: NSManagedObject, Codable {
 
     enum CodingKeys: CodingKey {
-        case id
+        case uid
         case name
         case isLive
     }
@@ -26,7 +26,7 @@ public class Room: NSManagedObject, Codable {
         do {
             let container = try decoder.container(keyedBy: CodingKeys.self)
 
-//            self.id = try container.decode(String.self, forKey: .id)
+            self.uid = try container.decode(String.self, forKey: .uid)
             self.name = try container.decode(String.self, forKey: .name)
             self.isLive = try container.decode(Bool.self, forKey: .isLive)
         } catch {
@@ -37,7 +37,7 @@ public class Room: NSManagedObject, Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try container.encode(id, forKey: .id)
+        try container.encode(uid, forKey: .uid)
         try container.encode(name, forKey: .name)
         try container.encode(isLive, forKey: .isLive)
     }

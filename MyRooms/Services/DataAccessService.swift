@@ -119,11 +119,14 @@ final class DataAccessService: DataAccessServiceProtocol {
                 subject.send(objects)
             }.store(in: &cancellableBag)
         }
+
         if let remoteRequest = request.remoteRequest {
             apiService.dataRequest(for: remoteRequest).responseJSON { [weak self] response in
+
                 switch response.result {
                 case .success(let result):
                     guard let result = result as? [[String: Any]] else { return }
+
                     let objects: [T] = result.compactMap { self?.databaseService.decodeObject(with: $0) }
                     if let _ = request.localRequest {
                         self?.databaseService.save()
