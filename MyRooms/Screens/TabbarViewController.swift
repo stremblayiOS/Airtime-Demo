@@ -15,7 +15,7 @@ final class TabbarViewController: UITabBarController {
         self.dataAccessService = dataAccessService
         super.init(nibName: nil, bundle: nil)
 
-        createRoom()
+        deleteAllRooms()
     }
 
     required init?(coder: NSCoder) {
@@ -28,7 +28,8 @@ final class TabbarViewController: UITabBarController {
         let myRoomsViewController = ServiceFactory.resolve(serviceType: MyRoomsViewController.self)
         let myRoomsLiveViewController = ServiceFactory.resolve(serviceType: MyRoomsLiveViewController.self)
 
-        viewControllers = [myRoomsViewController, myRoomsLiveViewController]
+        viewControllers = [UINavigationController(rootViewController: myRoomsViewController),
+                           UINavigationController(rootViewController: myRoomsLiveViewController)]
     }
 }
 
@@ -36,18 +37,5 @@ private extension TabbarViewController {
 
     func deleteAllRooms() {
         dataAccessService.deleteObject(request: RoomDataAccessRequest.deleteAllRooms, nil)
-    }
-
-    func createRoom() {
-        // 1. Create the object and set paramaters
-        let room = dataAccessService.createObject(Room.self)
-        room.name = UUID().uuidString
-        room.isLive = Bool.random()
-
-        // 2. Create the request
-        let request = RoomDataAccessRequest.create(room: room)
-
-        // 3. Save object
-        dataAccessService.saveObject(request: request, nil)
     }
 }

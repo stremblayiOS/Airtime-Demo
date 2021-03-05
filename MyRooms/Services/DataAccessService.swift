@@ -21,19 +21,20 @@ protocol DataAccessServiceProtocol {
     /// - Returns: A newly created instance ready be saved
     func createObject<T: Object>(_ type: T.Type) -> T
 
-    /// Generic funtion to retrieve all objects according to the given data accessor request
-    ///
-    /// - Parameters:
-    ///   - request: The data accessor request used to retrieve the objects
-    ///   - closure: Callback triggered once the objects have been retrieved. If the objects, did not previously exsist in the local db, they will now have been downloaded and saved into the db
-    func getObjects<T>(request: DataAccessRequest, _ closure: ((Result<[T], DataAccessError>) -> Void)?) where T: Object
-
     /// Generic funtion to retrieve an object according to the given data accessor request
     ///
     /// - Parameters:
     ///   - request: The data accessor request used to retrieve the object
     ///   - closure: Callback triggered once the object has been retrieved. If the object, did not previously exsist in the local db, it will now have been downloaded and saved into the db
     func getObject<T>(request: DataAccessRequest, _ closure: ((Result<T, DataAccessError>) -> Void)?) where T: Object
+
+    /// Generic funtion to retrieve all objects according to the given data accessor request
+    ///
+    /// - Parameters:
+    ///   - request: The data accessor request used to retrieve the objects
+    ///   - closure: Callback triggered once the objects have been retrieved. If the objects, did not previously exsist in the local db, they will now have been downloaded and saved into the db
+    func getObjects<T>(request: DataAccessRequest, _ closure: ((Result<[T], DataAccessError>) -> Void)?) where T: Object
+    func getObjects<T>(request: DataAccessRequest) -> AnyPublisher<[T], DataAccessError> where T: Object, T: Codable
 
     /// Generic funtion to create/update an object according to the given data accessor request
     ///
@@ -55,6 +56,8 @@ final class DataAccessService: DataAccessServiceProtocol {
     private let databaseService: DatabaseServiceProtocol
     private let apiService: APIServiceProtocol
 
+    private var cancellableBag = Set<AnyCancellable>()
+
     required init(databaseService: DatabaseServiceProtocol, apiService: APIServiceProtocol) {
         self.databaseService = databaseService
         self.apiService = apiService
@@ -64,74 +67,77 @@ final class DataAccessService: DataAccessServiceProtocol {
         databaseService.createObject(type)
     }
 
-    func getObjects<T>(request: DataAccessRequest, _ closure: ((Result<[T], DataAccessError>) -> Void)?) where T: Object {
-
-//        if let localRequest = request.local {
-//            let result: Result<[T], Error> = databaseService.getObjects(with: localRequest)
-//
-//            switch result {
-//            case .success(let objects):
-//                closure?(.success(objects))
-//            case .failure:
-//                closure?(.failure(.database))
-//            }
-//        }
-    }
-
     func getObject<T>(request: DataAccessRequest, _ closure: ((Result<T, DataAccessError>) -> Void)?) where T: Object {
 
+        if let localRequest = request.localRequest, let objectId = localRequest.id {
+            let result: Result<T, Error> = databaseService.getObject(id: objectId)
+
+            switch result {
+            case .success(let object):
+                closure?(.success(object))
+            case .failure:
+                closure?(.failure(.database))
+            }
+        }
+    }
+
+    func getObjects<T>(request: DataAccessRequest, _ closure: ((Result<[T], DataAccessError>) -> Void)?) where T: Object {
+
+        if let localRequest = request.localRequest {
+            let result: Result<[T], Error> = databaseService.getObjects(predicate: localRequest.filter)
+
+            switch result {
+            case .success(let objects):
+                closure?(.success(objects))
+            case .failure:
+                closure?(.failure(.database))
+            }
+        }
     }
 
     func saveObject<T>(request: DataAccessRequest, _ closure: ((Result<T, DataAccessError>) -> Void)?) where T: Object {
-        if let localRequest = request.localRequest, let object = localRequest.object {
-            databaseService.saveObject(object: object)
+        if let _ = request.localRequest {
+            databaseService.save()
         }
     }
 
     func deleteObject(request: DataAccessRequest, _ closure: ((Result<Void, DataAccessError>) -> Void)?) {
-
+        if let _ = request.localRequest {
+            databaseService.deleteObjects(object: request.type, predicate: nil)
+        }
     }
 
+    // Start using combine
 
-
-
-
-
-//    func getObjects<T>(request: DataAccessRequestConvertible) -> AnyPublisher<[T], DataAccessError> where T: Object {
-//        Future { [weak self] promise in
-//            guard let self = self else { return }
-//
-//            let result: Result<[T], Error> = self.databaseService.getObjects()
-//
-//            switch result {
-//            case .success(let objects):
-//                promise(.success(objects))
-//            case .failure:
-//                promise(.failure(.database))
-//            }
-//        }.eraseToAnyPublisher()
-//    }
-
-    func getObjects<T>(request: DataAccessRequest) -> AnyPublisher<[T], DataAccessError> where T: Object {
-
+    func getObjects<T>(request: DataAccessRequest) -> AnyPublisher<[T], DataAccessError> where T: Object, T: Codable {
         let subject = PassthroughSubject<[T], DataAccessError>()
-        let publisher = subject.eraseToAnyPublisher()
 
-        let result: Result<[T], Error> = databaseService.getObjects()
-
-        switch result {
-        case .success(let objects):
-            subject.send(objects)
-        case .failure:
-            subject.send(completion: .failure(.database))
+        if let localRequest = request.localRequest {
+            databaseService.getObjects(predicate: localRequest.filter).sink { _ in
+                subject.send(completion: .failure(.database))
+            } receiveValue: { (objects: [T]) in
+                subject.send(objects)
+            }.store(in: &cancellableBag)
+        }
+        if let remoteRequest = request.remoteRequest {
+            apiService.dataRequest(for: remoteRequest).responseJSON { [weak self] response in
+                switch response.result {
+                case .success(let result):
+                    guard let result = result as? [[String: Any]] else { return }
+                    let objects: [T] = result.compactMap { self?.databaseService.decodeObject(with: $0) }
+                    if let _ = request.localRequest {
+                        self?.databaseService.save()
+                    } else {
+                        subject.send(objects)
+                    }
+                case .failure(let error):
+                    subject.send(completion: .failure(.remote(error: error)))
+                }
+            }
         }
 
-        return publisher
+        return subject.eraseToAnyPublisher()
     }
-
-
-
-
 
 //
 //    func getObjects<T>(request: DataAccessRequestConvertible, _ closure: ((Response<Results<T>, DataAccessError>) -> Void)?) where T : Object, T : Decodable {

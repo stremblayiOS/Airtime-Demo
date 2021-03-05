@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 final class MyRoomsLiveViewController: UITableViewController {
 
@@ -16,6 +17,8 @@ final class MyRoomsLiveViewController: UITableViewController {
             tableView.reloadData()
         }
     }
+
+    private var cancellableBag = Set<AnyCancellable>()
 
     init(dataAccessService: DataAccessServiceProtocol) {
         self.dataAccessService = dataAccessService
@@ -33,14 +36,9 @@ final class MyRoomsLiveViewController: UITableViewController {
 
         setup()
 
-        dataAccessService.getObjects(request: RoomDataAccessRequest.myRoomsLive) { [weak self] (result: Result<[Room], DataAccessError>) in
-            switch result {
-            case .success(let objects):
-                self?.rooms = objects
-            case .failure:
-                break
-            }
-        }
+        dataAccessService.getObjects(request: RoomDataAccessRequest.myRoomsLive).sink { _ in } receiveValue: { [weak self] (rooms: [Room]) in
+            self?.rooms = rooms
+        }.store(in: &cancellableBag)
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

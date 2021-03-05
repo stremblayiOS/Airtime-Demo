@@ -27,7 +27,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         stub(condition: isPath(RoomRouter.rooms.route().path)) { _ in
           // Stub it with our "wsresponse.json" stub file (which is in same bundle as self)
-          let stubPath = OHPathForFile("wsresponse.json", type(of: self))
+          let stubPath = OHPathForFile("rooms.json", type(of: self))
           return fixture(filePath: stubPath!, headers: ["Content-Type":"application/json"])
         }
 

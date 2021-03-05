@@ -23,11 +23,15 @@ public class Room: NSManagedObject, Codable {
         }
         self.init(context: context)
 
-        let container = try decoder.container(keyedBy: CodingKeys.self)
+        do {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        self.id = try container.decode(String.self, forKey: .id)
-        self.name = try container.decode(String.self, forKey: .name)
-        self.isLive = try container.decode(Bool.self, forKey: .isLive)
+//            self.id = try container.decode(String.self, forKey: .id)
+            self.name = try container.decode(String.self, forKey: .name)
+            self.isLive = try container.decode(Bool.self, forKey: .isLive)
+        } catch {
+            print(error.localizedDescription)
+        }
     }
 
     public func encode(to encoder: Encoder) throws {

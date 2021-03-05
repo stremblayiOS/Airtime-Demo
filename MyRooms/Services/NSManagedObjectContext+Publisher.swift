@@ -9,7 +9,8 @@ import CoreData
 import Combine
 
 extension NSManagedObjectContext {
-    func changesPublisher<Object: NSManagedObject>(for fetchRequest: NSFetchRequest<Object>) -> ManagedObjectChangesPublisher<Object> {
+    
+    func changesPublisher<T: Object>(for fetchRequest: NSFetchRequest<T>) -> ManagedObjectChangesPublisher<T> {
         ManagedObjectChangesPublisher(fetchRequest: fetchRequest, context: self)
     }
 }
@@ -56,11 +57,14 @@ public final class ManagedObjectChangesPublisher<ResultType>: Publisher where Re
         }
         
         func request(_ demand: Subscribers.Demand) {
-            guard demand > 0,
-                  let subscriber = subscriber,
-                  let fetchRequest = fetchRequest,
-                  let context = context else { return }
-            
+            guard
+                demand > 0,
+                let subscriber = subscriber,
+                let fetchRequest = fetchRequest,
+                let context = context
+            else {
+                return
+            }
             fetchController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: nil,cacheName: nil)
             fetchController?.delegate = self
             
@@ -83,12 +87,14 @@ public final class ManagedObjectChangesPublisher<ResultType>: Publisher where Re
         
         // MARK: - NSFetchedResultsControllerDelegate
         func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-            guard let subscriber = subscriber,
-                  controller == self.fetchController else { return }
-            
-            if let fetchedObjects = self.fetchController?.fetchedObjects {
-                _ = subscriber.receive(fetchedObjects)
+            guard
+                let subscriber = subscriber,
+                controller == fetchController,
+                let fetchedObjects = fetchController?.fetchedObjects
+            else {
+                return
             }
+            _ = subscriber.receive(fetchedObjects)
         }
     }
 }

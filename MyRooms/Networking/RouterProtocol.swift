@@ -24,8 +24,8 @@ protocol RouterProtocol {
 extension RouterProtocol {
     
     func baseUrl() throws -> URL {
-        guard let baseUrl = URL(string: "INSERT BASE URL") else {
-            throw NSError()
+        guard let baseUrl = URL(string: "http://www.airtime.com") else {
+            throw NSError(domain: "", code: 0, userInfo: [:])
         }
         return baseUrl
     }

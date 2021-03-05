@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 final class MyRoomsViewController: UITableViewController {
 
@@ -28,19 +29,26 @@ final class MyRoomsViewController: UITableViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
+    private var cancellableBag = Set<AnyCancellable>()
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         setup()
 
-        dataAccessService.getObjects(request: RoomDataAccessRequest.myRooms) { [weak self] (result: Result<[Room], DataAccessError>) in
-            switch result {
-            case .success(let objects):
-                self?.rooms = objects
-            case .failure:
-                break
-            }
-        }
+        dataAccessService.getObjects(request: RoomDataAccessRequest.myRooms).sink { _ in } receiveValue: { [weak self] (rooms: [Room]) in
+            self?.rooms = rooms
+        }.store(in: &cancellableBag)
+
+        let addBarButtonItem = UIBarButtonItem(systemItem: .add, primaryAction: UIAction(handler: { [weak self] _ in
+            self?.createRoom()
+        }))
+
+        let trashBarButtonItem = UIBarButtonItem(systemItem: .trash, primaryAction: UIAction(handler: { [weak self] _ in
+            self?.dataAccessService.deleteObject(request: RoomDataAccessRequest.deleteAllRooms, nil)
+        }))
+
+        navigationItem.rightBarButtonItems = [trashBarButtonItem, addBarButtonItem]
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -75,5 +83,18 @@ private extension MyRoomsViewController {
 
     func setupConstraints() {
         // Autolayout code
+    }
+
+    func createRoom() {
+        // 1. Create the object and set paramaters
+        let room = dataAccessService.createObject(Room.self)
+        room.name = UUID().uuidString
+        room.isLive = Bool.random()
+
+        // 2. Create the request
+        let request = RoomDataAccessRequest.create(room: room)
+
+        // 3. Save object
+        dataAccessService.saveObject(request: request, nil)
     }
 }

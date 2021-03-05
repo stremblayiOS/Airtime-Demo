@@ -36,11 +36,11 @@ enum RoomRouter: URLRequestConvertible, RouterProtocol {
         var urlRequest = URLRequest(url: try baseUrl().appendingPathComponent(route.path))
         urlRequest.httpMethod = route.method.rawValue
 
-        let parameters = route.parameters as? Parameters
-        switch self {
-        default:
-            urlRequest = try JSONEncoding.default.encode(urlRequest, with: parameters)
-        }
+//        let parameters = route.parameters as? Parameters
+//        switch self {
+//        default:
+//            urlRequest = try JSONEncoding.default.encode(urlRequest, with: parameters)
+//        }
         return urlRequest
     }
 }

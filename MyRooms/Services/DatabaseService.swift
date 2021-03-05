@@ -13,17 +13,20 @@ import UIKit
 /// Service protocol definition
 protocol DatabaseServiceProtocol {
 
-    /// Generic function to save an object to the db
+    /// Create an instance of NSManagedObject along with the desired managed context
+    /// Warning: It doesn't save the object. You need to call `func save()` for that.
     ///
-    /// - Parameter object: The object to save
-    /// - Returns: The saved object
-    func saveObject<T>(object: T) where T: Object
+    /// - Parameters:
+    ///   - type: The type of the managed object you want to create
+    ///
+    /// - Returns: A newly created instance ready be saved
+    func createObject<T: Object>(_ type: T.Type) -> T
 
-    /// Generic function to save multiple objects to the db
+    func decodeObject<T: Decodable>(with JSON: [AnyHashable: Any]) -> T?
+
+    /// Function to save the context if there is any changes to save
     ///
-    /// - Parameter objects: The objects to save
-    /// - Returns: The saved objects
-    func saveObjects<T>(objects: [T]) where T: Codable, T: Object
+    func save()
 
     /// Generic function to retrieve a single object from the db according to a primary key
     ///
@@ -34,25 +37,18 @@ protocol DatabaseServiceProtocol {
     /// Generic function to retrieve multiple objects from the db
     ///
     /// - Returns: The retrieved results object. If nil, no objects were found
-    func getObjects<T: Object>() -> Result<[T], Error>
-//    func getObjects<T: Object>(with localDataAccessor: Local) -> Result<[T], Error>
+    func getObjects<T: Object>(predicate: NSPredicate?) -> Result<[T], Error>
+    func getObjects<T: Object>(predicate: NSPredicate?) -> ManagedObjectChangesPublisher<T>
 
     /// Delete a given object from the db
     ///
     /// - Parameter object: The object to delete
     func deleteObject(object: Object)
 
-    func save()
+    // TODO: Missing Doc
+    func deleteObjects(object: Object.Type, predicate: NSPredicate?)
 
-    /// Create an instance of NSManagedObject along with the desired managed context
-    /// Warning: It doesn't save the object. You need to call `func save()` for that.
-    ///
-    /// - Parameters:
-    ///   - type: The type of the managed object you want to create
-    ///
-    /// - Returns: A newly created instance ready be saved
-    func createObject<T: Object>(_ type: T.Type) -> T
-
+    // TODO: Missing Doc
     func deleteAllData()
 }
 
@@ -68,9 +64,15 @@ final class DatabaseService: DatabaseServiceProtocol {
         return container
     }()
 
-    private lazy var managedContext: NSManagedObjectContext = persistentContainer.viewContext
+    private lazy var managedObjectContext: NSManagedObjectContext = persistentContainer.viewContext
 
     private var subscribers = Set<AnyCancellable>()
+
+    private lazy var decoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.userInfo[CodingUserInfoKey.managedObjectContext] = managedObjectContext
+        return decoder
+    }()
 
     required init() {
         NotificationCenter.default
@@ -83,32 +85,23 @@ final class DatabaseService: DatabaseServiceProtocol {
     }
 
     func createObject<T: Object>(_ type: T.Type) -> T {
-        T(context: managedContext)
+        T(context: managedObjectContext)
     }
 
-    func saveObject<T>(object: T) where T: Object {
-
-//        let encoder = JSONEncoder()
-//        let jsonData = try! encoder.encode(object)
-//
-//        let decoder = JSONDecoder()
-//        decoder.userInfo[CodingUserInfoKey.managedObjectContext] = managedContext
-//
-//        let _ = try! decoder.decode(T.self, from: jsonData)
-
-        save()
-    }
-
-    func saveObjects<T: Object>(objects: [T]) {
-
-
+    func decodeObject<T: Decodable>(with JSON: [AnyHashable: Any]) -> T? {
+        do {
+            let data = try JSONSerialization.data(withJSONObject: JSON, options: .prettyPrinted)
+            return try decoder.decode(T.self, from: data)
+        } catch {
+            return nil
+        }
     }
 
     func getObject<T: Object>(id: String) -> Result<T, Error> {
         let fetchRequest = NSFetchRequest<T>(entityName: String(describing: T.self))
         fetchRequest.predicate = NSPredicate(format: "id == %@", id)
         do {
-            return .success(try managedContext.fetch(fetchRequest).first!)
+            return .success(try managedObjectContext.fetch(fetchRequest).first!)
         } catch {
             return .failure(error)
         }
@@ -118,21 +111,32 @@ final class DatabaseService: DatabaseServiceProtocol {
         let fetchRequest = NSFetchRequest<T>(entityName: String(describing: T.self))
         fetchRequest.predicate = predicate
         do {
-            return .success(try managedContext.fetch(fetchRequest).first!)
+            return .success(try managedObjectContext.fetch(fetchRequest).first!)
         } catch {
             return .failure(error)
         }
     }
 
-    func getObjects<T: Object>() -> Result<[T], Error> {
+    func getObjects<T: Object>(predicate: NSPredicate?) -> Result<[T], Error> {
         let fetchRequest = NSFetchRequest<T>(entityName: String(describing: T.self))
+        fetchRequest.predicate = predicate
         // Revert this to true on production
 //        fetchRequest.returnsObjectsAsFaults = false
         do {
-            return .success(try managedContext.fetch(fetchRequest))
+            let objects = try managedObjectContext.fetch(fetchRequest)
+            return .success(objects)
         } catch {
             return .failure(error)
         }
+    }
+
+    // Start using combine
+
+    func getObjects<T: Object>(predicate: NSPredicate?) -> ManagedObjectChangesPublisher<T> {
+        let fetchRequest = NSFetchRequest<T>(entityName: String(describing: T.self))
+        fetchRequest.predicate = predicate
+        fetchRequest.sortDescriptors = []
+        return managedObjectContext.changesPublisher(for: fetchRequest)
     }
 
 //    func getObjects<T: Object>(with localDataAccessor: LocalDataAccessor) -> Result<[T], Error> {
@@ -166,17 +170,17 @@ final class DatabaseService: DatabaseServiceProtocol {
 
     }
 
-    func deleteObjects(object: Object, predicate: NSPredicate? = nil) {
-        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = Object.fetchRequest()
+    func deleteObjects(object: Object.Type, predicate: NSPredicate? = nil) {
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: String(describing: object))
         fetchRequest.predicate = predicate
         let batchDeleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
         batchDeleteRequest.resultType = .resultTypeObjectIDs
         do {
-            let result = try managedContext.execute(batchDeleteRequest) as! NSBatchDeleteResult
+            let result = try managedObjectContext.execute(batchDeleteRequest) as! NSBatchDeleteResult
             let changes: [AnyHashable: Any] = [
                 NSDeletedObjectsKey: result.result as! [NSManagedObjectID]
             ]
-            NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [managedContext])
+            NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [managedObjectContext])
             save()
         } catch {
             fatalError("Error deleting objects: \(error.localizedDescription)")
@@ -184,21 +188,21 @@ final class DatabaseService: DatabaseServiceProtocol {
     }
 
     func save() {
-        guard managedContext.hasChanges else { return }
+        guard managedObjectContext.hasChanges else { return }
         do {
-            try managedContext.save()
+            try managedObjectContext.save()
         } catch {
             fatalError("Error saving objects: \(error.localizedDescription)")
         }
     }
 
     func clearAllObjects() {
-        guard let firstStoreURL = managedContext.persistentStoreCoordinator?.persistentStores.first?.url else {
+        guard let firstStoreURL = managedObjectContext.persistentStoreCoordinator?.persistentStores.first?.url else {
             print("Missing first store URL - could not destroy")
             return
         }
         do {
-            try managedContext.persistentStoreCoordinator?.destroyPersistentStore(at: firstStoreURL, ofType: "", options: [:])
+            try managedObjectContext.persistentStoreCoordinator?.destroyPersistentStore(at: firstStoreURL, ofType: "", options: [:])
         } catch {
             // Error Handling
         }
@@ -207,7 +211,7 @@ final class DatabaseService: DatabaseServiceProtocol {
     func deleteAllData() {
 
         // This doesn't work: need to figure out why
-        managedContext.reset()
+        managedObjectContext.reset()
         save()
 
 
@@ -283,7 +287,6 @@ final class DatabaseService: DatabaseServiceProtocol {
     }
 
     func publisher<T: Object>(for managedObject: T, in context: NSManagedObjectContext, changeTypes: [ChangeType]) -> AnyPublisher<(object: T?, type: ChangeType), Never> {
-
       let notification = NSManagedObjectContext.didMergeChangesObjectIDsNotification
       return NotificationCenter.default.publisher(for: notification, object: context).compactMap { notification in
           for type in changeTypes {
@@ -297,27 +300,12 @@ final class DatabaseService: DatabaseServiceProtocol {
     }
 
     func managedObject(with id: NSManagedObjectID, changeType: ChangeType, from notification: Notification, in context: NSManagedObjectContext) -> Object? {
-
       guard
         let objects = notification.userInfo?[changeType.userInfoKey] as? Set<NSManagedObjectID>,
         objects.contains(id)
       else {
         return nil
       }
-
       return context.object(with: id)
-    }
-}
-
-extension NSManagedObject {
-
-    func shallowCopy() -> NSManagedObject? {
-        guard let context = managedObjectContext, let entityName = entity.name else { return nil }
-        let copy = NSEntityDescription.insertNewObject(forEntityName: entityName, into: context)
-        let attributes = entity.attributesByName
-        for (attrKey, _) in attributes {
-            copy.setValue(value(forKey: attrKey), forKey: attrKey)
-        }
-        return copy
     }
 }
