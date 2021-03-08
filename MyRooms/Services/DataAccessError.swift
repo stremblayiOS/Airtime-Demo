@@ -9,5 +9,9 @@ import Alamofire
 
 enum DataAccessError: Error {
     case remote(error: AFError)
-    case database
+    case remoteResponseUnexpected
+    case database(error: NSError)
+
+    /// The DataAccessRequest is invalid as it's missing the remote and local request. It needs at least one.
+    case dataAccessRequestInvalid
 }

@@ -12,6 +12,12 @@ final class MyRoomsViewController: UITableViewController {
 
     private let dataAccessService: DataAccessServiceProtocol
 
+    typealias DataSource = UITableViewDiffableDataSource<String, Room>
+    typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<String, Room>
+
+    private var dataSource: DataSource!
+    private var snapshot = DataSourceSnapshot()
+
     private var rooms: [Room] = [] {
         didSet {
             tableView.reloadData()
@@ -63,26 +69,43 @@ final class MyRoomsViewController: UITableViewController {
 
         return cell
     }
+
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+
+    }
 }
 
 private extension MyRoomsViewController {
 
     func setup() {
         setupViews()
-        setupStyles()
         setupConstraints()
+        setupStyles()
+        setupBindings()
     }
 
     func setupViews() {
-        // Setup delegates and any special initialization
-    }
 
-    func setupStyles() {
-        // Setup any special style
+        dataSource = DataSource(tableView: tableView, cellProvider: { (tableView, indexPath, room) -> UITableViewCell? in
+            let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "MyRoomsCell")
+            cell.textLabel?.text = room.name
+            cell.detailTextLabel?.text = room.isLive == true ? "live" : "non-live"
+            return cell
+        })
+
+        tableView.dataSource = dataSource
     }
 
     func setupConstraints() {
         // Autolayout code
+    }
+
+    // Setup sizes, fonts and colors. This will be called several times as the user changes content size and turns dark mode on/off.
+    func setupStyles() {
+    }
+
+    func setupBindings() {
+        
     }
 
     func createRoom() {
