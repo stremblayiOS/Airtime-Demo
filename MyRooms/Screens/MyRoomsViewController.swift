@@ -88,6 +88,7 @@ private extension MyRoomsViewController {
     func createRoom() {
         // 1. Create the object and set paramaters
         let room = dataAccessService.createObject(Room.self)
+        room.id = UUID().uuidString
         room.name = UUID().uuidString
         room.isLive = Bool.random()
 
