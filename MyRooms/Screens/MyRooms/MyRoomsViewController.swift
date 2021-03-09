@@ -115,6 +115,11 @@ private extension MyRoomsViewController {
     func setupBindings() {
 
         viewModel
+            .title
+            .assign(to: \.title, onWeak: self)
+            .store(in: &cancellables)
+
+        viewModel
             .cellViewModels
             .map { $0 as! [MyRoomsCellViewModelImplementation] }
             .sink { [weak self] cellsViewModels in
