@@ -33,8 +33,8 @@ protocol DataAccessServiceProtocol {
     /// - Parameters:
     ///   - request: The data accessor request used to retrieve the objects
     ///   - closure: Callback triggered once the objects have been retrieved. If the objects, did not previously exsist in the local db, they will now have been downloaded and saved into the db
-    func getObjects<T>(request: DataAccessRequest, _ closure: ((Result<[T], DataAccessError>) -> Void)?) where T: Object
-    func getObjects<T>(request: DataAccessRequest) -> AnyPublisher<[T], DataAccessError> where T: Object, T: Codable
+    //func getObjects<T>(request: DataAccessRequest, _ closure: ((Result<[T], DataAccessError>) -> Void)?) where T: Object
+    func getObjects<T>(type: T.Type, request: DataAccessRequest) -> AnyPublisher<[T], DataAccessError> where T: Object, T: Codable
 
     /// Generic funtion to create/update an object according to the given data accessor request
     ///
@@ -109,7 +109,7 @@ final class DataAccessService: DataAccessServiceProtocol {
 
     // Combine implementations
 
-    func getObjects<T>(request: DataAccessRequest) -> AnyPublisher<[T], DataAccessError> where T: Object, T: Codable {
+    func getObjects<T>(type: T.Type, request: DataAccessRequest) -> AnyPublisher<[T], DataAccessError> where T: Object, T: Codable {
 
         typealias ResulPublisher = AnyPublisher<[T], DataAccessError>
 
