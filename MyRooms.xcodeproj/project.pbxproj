@@ -32,6 +32,8 @@
 		2284AD9125E04257005EE4AD /* NSManagedObjectContext+Publisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2284AD9025E04257005EE4AD /* NSManagedObjectContext+Publisher.swift */; };
 		22E73A0C25F2A35400BD2184 /* rooms.json in Resources */ = {isa = PBXBuildFile; fileRef = 22E73A0B25F2A35400BD2184 /* rooms.json */; };
 		3D77ED90CBAB78ABFF5D62C1 /* Pods_MyRooms.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC28663FDBBA4CE57BC37A5A /* Pods_MyRooms.framework */; };
+		DE2B4E9525F67AC200E8541D /* MyRoomsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2B4E9425F67AC200E8541D /* MyRoomsViewModel.swift */; };
+		DE2B4E9825F67B0400E8541D /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE2B4E9725F67B0400E8541D /* Localization.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -63,6 +65,8 @@
 		22E73A0B25F2A35400BD2184 /* rooms.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = rooms.json; sourceTree = "<group>"; };
 		AC28663FDBBA4CE57BC37A5A /* Pods_MyRooms.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MyRooms.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3BC856F12EB193DC2B00A78 /* Pods-MyRooms.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MyRooms.debug.xcconfig"; path = "Target Support Files/Pods-MyRooms/Pods-MyRooms.debug.xcconfig"; sourceTree = "<group>"; };
+		DE2B4E9425F67AC200E8541D /* MyRoomsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRoomsViewModel.swift; sourceTree = "<group>"; };
+		DE2B4E9725F67B0400E8541D /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
 		FFDD44953827BEBA44BB8A59 /* Pods-MyRooms.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MyRooms.release.xcconfig"; path = "Target Support Files/Pods-MyRooms/Pods-MyRooms.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -106,6 +110,7 @@
 				22295DA725D6BA06000FBA25 /* Model */,
 				22295DB025D6BA06000FBA25 /* Networking */,
 				22295DAA25D6BA06000FBA25 /* Services */,
+				DE2B4E9A25F67B1B00E8541D /* Localization */,
 				22295D9825D6B6A0000FBA25 /* Assets.xcassets */,
 				22295D9D25D6B6A0000FBA25 /* LaunchScreen.storyboard */,
 				22295DA025D6B6A0000FBA25 /* Info.plist */,
@@ -163,6 +168,7 @@
 			children = (
 				2229821525D6DEA900B17A34 /* TabbarViewController.swift */,
 				2229821825D6DEF000B17A34 /* MyRoomsViewController.swift */,
+				DE2B4E9425F67AC200E8541D /* MyRoomsViewModel.swift */,
 				2229821B25D6DEFE00B17A34 /* MyRoomsLiveViewController.swift */,
 			);
 			path = Screens;
@@ -183,6 +189,14 @@
 				FFDD44953827BEBA44BB8A59 /* Pods-MyRooms.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		DE2B4E9A25F67B1B00E8541D /* Localization */ = {
+			isa = PBXGroup;
+			children = (
+				DE2B4E9725F67B0400E8541D /* Localization.swift */,
+			);
+			path = Localization;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -312,8 +326,10 @@
 				22295DBE25D6BA06000FBA25 /* DataAccessRequest.swift in Sources */,
 				2229826925D6FAEE00B17A34 /* Room+CoreDataClass.swift in Sources */,
 				22295DBC25D6BA06000FBA25 /* Bootstrapper.swift in Sources */,
+				DE2B4E9825F67B0400E8541D /* Localization.swift in Sources */,
 				2229826A25D6FAEE00B17A34 /* Room+CoreDataProperties.swift in Sources */,
 				2229821925D6DEF000B17A34 /* MyRoomsViewController.swift in Sources */,
+				DE2B4E9525F67AC200E8541D /* MyRoomsViewModel.swift in Sources */,
 				22295D9425D6B69F000FBA25 /* ContentView.swift in Sources */,
 				2284AD4425DC0FE7005EE4AD /* DataAccessError.swift in Sources */,
 				2229821C25D6DEFE00B17A34 /* MyRoomsLiveViewController.swift in Sources */,

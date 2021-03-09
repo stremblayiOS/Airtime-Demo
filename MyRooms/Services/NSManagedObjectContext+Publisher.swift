@@ -10,7 +10,7 @@ import Combine
 
 extension NSManagedObjectContext {
     
-    func changesPublisher<T: Object>(for fetchRequest: NSFetchRequest<T>) -> ManagedObjectChangesPublisher<T> {
+    func changesPublisher<T: NSManagedObject>(for fetchRequest: NSFetchRequest<T>) -> ManagedObjectChangesPublisher<T> {
         ManagedObjectChangesPublisher(fetchRequest: fetchRequest, context: self)
     }
 }
@@ -30,7 +30,13 @@ public final class ManagedObjectChangesPublisher<ResultType>: Publisher where Re
     public typealias Failure = NSError
     
     public func receive<S>(subscriber: S) where S: Subscriber, S.Failure == Failure, S.Input == Output {
-        subscriber.receive(subscription: ManagedObjectChangesSubscription(subscriber: subscriber, fetchRequest: fetchRequest, context: context))
+        subscriber.receive(
+            subscription: ManagedObjectChangesSubscription(
+                subscriber: subscriber,
+                fetchRequest: fetchRequest,
+                context: context
+            )
+        )
     }
     
     public var value: Output? {
@@ -50,7 +56,9 @@ public final class ManagedObjectChangesPublisher<ResultType>: Publisher where Re
         private(set) var context: NSManagedObjectContext?
         private(set) var fetchController: NSFetchedResultsController<ResultType>?
         
-        init(subscriber: SubscriberType, fetchRequest: NSFetchRequest<ResultType>, context: NSManagedObjectContext) {
+        init(subscriber: SubscriberType,
+             fetchRequest: NSFetchRequest<ResultType>,
+             context: NSManagedObjectContext) {
             self.subscriber = subscriber
             self.fetchRequest = fetchRequest
             self.context = context
@@ -65,7 +73,12 @@ public final class ManagedObjectChangesPublisher<ResultType>: Publisher where Re
             else {
                 return
             }
-            fetchController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: nil,cacheName: nil)
+            fetchController = NSFetchedResultsController(
+                fetchRequest: fetchRequest,
+                managedObjectContext: context,
+                sectionNameKeyPath: nil,
+                cacheName: nil
+            )
             fetchController?.delegate = self
             
             do {

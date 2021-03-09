@@ -32,12 +32,12 @@ protocol DatabaseServiceProtocol {
     ///
     /// - Parameter id: The object's primary key
     /// - Returns: The found object, otherwise nil
-    func getObject<T: Object>(id: String) -> Result<T, Error>
+    func getObject<T: Object>(id: String) -> Result<T, NSError>
 
     /// Generic function to retrieve multiple objects from the db
     ///
     /// - Returns: The retrieved results object. If nil, no objects were found
-    func getObjects<T: Object>(predicate: NSPredicate?) -> Result<[T], Error>
+    func getObjects<T: Object>(predicate: NSPredicate?) -> Result<[T], NSError>
     func getObjects<T: Object>(predicate: NSPredicate?) -> ManagedObjectChangesPublisher<T>
 
     /// Delete a given object from the db
@@ -97,27 +97,27 @@ final class DatabaseService: DatabaseServiceProtocol {
         }
     }
 
-    func getObject<T: Object>(id: String) -> Result<T, Error> {
+    func getObject<T: Object>(id: String) -> Result<T, NSError> {
         let fetchRequest = NSFetchRequest<T>(entityName: String(describing: T.self))
         fetchRequest.predicate = NSPredicate(format: "id == %@", id)
         do {
             return .success(try managedObjectContext.fetch(fetchRequest).first!)
         } catch {
-            return .failure(error)
+            return .failure(error as NSError)
         }
     }
 
-    func getObject<T: Object>(predicate: NSPredicate? = nil) -> Result<T, Error> {
+    func getObject<T: Object>(predicate: NSPredicate? = nil) -> Result<T, NSError> {
         let fetchRequest = NSFetchRequest<T>(entityName: String(describing: T.self))
         fetchRequest.predicate = predicate
         do {
             return .success(try managedObjectContext.fetch(fetchRequest).first!)
         } catch {
-            return .failure(error)
+            return .failure(error as NSError)
         }
     }
 
-    func getObjects<T: Object>(predicate: NSPredicate?) -> Result<[T], Error> {
+    func getObjects<T: Object>(predicate: NSPredicate?) -> Result<[T], NSError> {
         let fetchRequest = NSFetchRequest<T>(entityName: String(describing: T.self))
         fetchRequest.predicate = predicate
         // Revert this to true on production
@@ -126,7 +126,7 @@ final class DatabaseService: DatabaseServiceProtocol {
             let objects = try managedObjectContext.fetch(fetchRequest)
             return .success(objects)
         } catch {
-            return .failure(error)
+            return .failure(error as NSError)
         }
     }
 

@@ -12,17 +12,31 @@ final class MyRoomsViewController: UITableViewController {
 
     private let dataAccessService: DataAccessServiceProtocol
 
+    typealias DataSource = UITableViewDiffableDataSource<String, MyRoomsCellViewModelImplementation>
+    typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<String, MyRoomsCellViewModelImplementation>
+
+    private var dataSource: DataSource!
+    var snapshot = DataSourceSnapshot()
+
     private var rooms: [Room] = [] {
         didSet {
             tableView.reloadData()
         }
     }
 
+    private var viewModel: MyRoomsViewModel
+
+    private var cancellables = Set<AnyCancellable>()
+
     init(dataAccessService: DataAccessServiceProtocol) {
         self.dataAccessService = dataAccessService
+
+        self.viewModel = MyRoomsViewModelImplementation(dataAccessService: dataAccessService) //TODO: move to DI
+
         super.init(style: .plain)
 
         title = "My Rooms"
+
     }
 
     required init?(coder: NSCoder) {
@@ -35,20 +49,6 @@ final class MyRoomsViewController: UITableViewController {
         super.viewDidLoad()
 
         setup()
-
-        dataAccessService.getObjects(request: RoomDataAccessRequest.myRooms).sink { _ in } receiveValue: { [weak self] (rooms: [Room]) in
-            self?.rooms = rooms
-        }.store(in: &cancellableBag)
-
-        let addBarButtonItem = UIBarButtonItem(systemItem: .add, primaryAction: UIAction(handler: { [weak self] _ in
-            self?.createRoom()
-        }))
-
-        let trashBarButtonItem = UIBarButtonItem(systemItem: .trash, primaryAction: UIAction(handler: { [weak self] _ in
-            self?.dataAccessService.deleteObject(request: RoomDataAccessRequest.deleteAllRooms, nil)
-        }))
-
-        navigationItem.rightBarButtonItems = [trashBarButtonItem, addBarButtonItem]
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -63,26 +63,68 @@ final class MyRoomsViewController: UITableViewController {
 
         return cell
     }
+
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+
+    }
 }
 
 private extension MyRoomsViewController {
 
     func setup() {
         setupViews()
-        setupStyles()
         setupConstraints()
+        setupStyles()
+        setupBindings()
     }
 
     func setupViews() {
-        // Setup delegates and any special initialization
-    }
 
-    func setupStyles() {
-        // Setup any special style
+        let addBarButtonItem = UIBarButtonItem(systemItem: .add, primaryAction: UIAction(handler: { [weak self] _ in
+            self?.createRoom()
+        }))
+
+        let trashBarButtonItem = UIBarButtonItem(systemItem: .trash, primaryAction: UIAction(handler: { [weak self] _ in
+            self?.dataAccessService.deleteObject(request: RoomDataAccessRequest.deleteAllRooms, nil)
+        }))
+
+        navigationItem.rightBarButtonItems = [trashBarButtonItem, addBarButtonItem]
+
+        dataSource = DataSource(
+            tableView: tableView,
+            cellProvider: { (tableView, indexPath, cellViewModel) -> UITableViewCell? in
+                let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "MyRoomsCell") //TODO: Dequeue reusable
+                cell.textLabel?.text = cellViewModel.title.value
+                cell.detailTextLabel?.text = cellViewModel.subtitle.value
+                return cell
+            }
+        )
+        dataSource.defaultRowAnimation = .none
+
+        tableView.dataSource = dataSource
     }
 
     func setupConstraints() {
         // Autolayout code
+    }
+
+    // Setup sizes, fonts and colors. This will be called several times as the user changes content size and turns dark mode on/off.
+    func setupStyles() {
+    }
+
+    func setupBindings() {
+
+        viewModel
+            .cellViewModels
+            .map { $0 as! [MyRoomsCellViewModelImplementation] }
+            .sink { [weak self] cellsViewModels in
+                guard let self = self else { return }
+                self.snapshot = DataSourceSnapshot()
+                self.snapshot.appendSections([""])
+                self.snapshot.appendItems(cellsViewModels)
+                self.dataSource.apply(self.snapshot)
+            }
+            .store(in: &cancellables)
     }
 
     func createRoom() {
