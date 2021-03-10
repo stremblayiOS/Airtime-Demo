@@ -125,119 +125,43 @@ final class DataAccessService: DataAccessServiceProtocol {
             let local: ResultPublisher = getObjectsPublisher(for: localRequest, dataAccessRequest: request)
             let remote: ResultPublisher = getObjectsPublisher(for: remoteRequest, dataAccessRequest: request)
 
-            return Publishers
-                .Merge(local, remote)
-                .eraseToAnyPublisher()
+            return Publishers.Merge(local, remote).eraseToAnyPublisher()
         }
     }
 
+//    func getObjects<T>(request: DataAccessRequest) -> AnyPublisher<[T], DataAccessError> where T: Object, T: Codable {
+//        let subject = PassthroughSubject<[T], DataAccessError>()
 //
-//    func getObjects<T>(request: DataAccessRequestConvertible, _ closure: ((Response<Results<T>, DataAccessError>) -> Void)?) where T : Object, T : Decodable {
-//        if let result: Results<T> = fetchObjectsWithRequest(request: request), !result.isEmpty {
-//            closure?(.success(result))
-//        } else {
-//            apiService?.dataRequest(for: request.remoteDataAccessor).responseArray(completionHandler: { [weak self] (response: DataResponse<[T]>) in
+//        if let localRequest = request.localRequest {
+//            databaseService.getObjects(predicate: localRequest.filter).sink { _ in
+//                subject.send(completion: .failure(.database))
+//            } receiveValue: { (objects: [T]) in
+//                subject.send(objects)
+//            }.store(in: &cancellableBag)
+//        }
+//
+//        if let remoteRequest = request.remoteRequest {
+//            apiService.dataRequest(for: remoteRequest).responseJSON { [weak self] response in
+//
 //                switch response.result {
-//                case .success(let objects):
-//                    do {
-//                        try self?.databaseService?.commitTransactions {
-//                            self?.databaseService?.saveObjects(objects: objects)
-//                        }
-//                        if let result: Results<T> = self?.fetchObjectsWithRequest(request: request) {
-//                            closure?(.success(result))
-//                        }
-//                    } catch {
-//                        closure?(.failure(.database))
-//                    }
-//                case .failure:
-//                    guard let statusCode = response.response?.statusCode, let errorType = RemoteError(statusCode: statusCode) else {
-//                        return
-//                    }
-//                    closure?(.failure(.remote(error: errorType)))
-//                }
-//            })
-//        }
-//    }
+//                case .success(let result):
+//                    guard let result = result as? [[String: Any]] else { return }
 //
-//    func getObject<T>(request: DataAccessRequestConvertible, _ closure: ((Response<T, DataAccessError>) -> Void)?) where T: Codable, T: Object {
-//        apiService?.dataRequest(for: request.remoteDataAccessor).responseObject { [weak self] (response: DataResponse<T>) in
-//            switch response.result {
-//            case .success(let object):
-//                do {
-//                    try self?.databaseService?.commitTransactions {
-//                        self?.databaseService?.saveObject(object: object)
+//                    let objects: [T] = result.compactMap { self?.databaseService.decodeObject(with: $0) }
+//                    if let _ = request.localRequest {
+//                        self?.databaseService.save()
+//                    } else {
+//                        subject.send(objects)
 //                    }
-//                    closure?(.success(object))
-//                } catch {
-//                    closure?(.failure(.database))
+//                case .failure(let error):
+//                    subject.send(completion: .failure(.remote(error: error)))
 //                }
-//            case .failure:
-//                guard let statusCode = response.response?.statusCode, let errorType = RemoteError(statusCode: statusCode) else {
-//                    return
-//                }
-//                closure?(.failure(.remote(error: errorType)))
 //            }
 //        }
-//    }
 //
-//    func saveObject<T>(request: DataAccessRequestConvertible, _ closure: ((Response<T, DataAccessError>) -> Void)?) where T: Codable, T: Object {
-//        apiService?.dataRequest(for: request.remoteDataAccessor).responseObject { [weak self] (response: DataResponse<T>) in
-//            switch response.result {
-//            case .success(let object):
-//                do {
-//                    try self?.databaseService?.commitTransactions {
-//                        self?.databaseService?.saveObject(object: object)
-//                    }
-//                    closure?(.success(object))
-//                } catch {
-//                    closure?(.failure(.database))
-//                }
-//            case .failure:
-//                guard let statusCode = response.response?.statusCode, let errorType = RemoteError(statusCode: statusCode) else {
-//                    return
-//                }
-//                closure?(.failure(.remote(error: errorType)))
-//            }
-//        }
-//    }
-//
-//    func deleteObject(request: DataAccessRequestConvertible, _ closure: ((Response<Void, DataAccessError>) -> Void)?) {
-//        apiService?.dataRequest(for: request.remoteDataAccessor).response() { response in
-//            if let _ = response.error {
-//                guard let statusCode = response.response?.statusCode, let errorType = RemoteError(statusCode: statusCode) else {
-//                    return
-//                }
-//                closure?(.failure(.remote(error: errorType)))
-//                return
-//            }
-//            guard let object = request.localDataAccessor.object else {
-//                closure?(.failure(.database))
-//                return
-//            }
-//            do {
-//                closure?(.success(Void()))
-//            } catch {
-//                closure?(.failure(.database))
-//            }
-//        }
+//        return subject.eraseToAnyPublisher()
 //    }
 }
-
-//private extension DataAccessService {
-//
-//    func fetchObjectsWithRequest<T>(request: DataAccessRequestConvertible) -> Results<T>? {
-//        if let filter = request.localDataAccessor.filter, let propertySortKey = request.localDataAccessor.propertySortKey {
-//            return databaseService?.getObjects(filter: filter, sortByKeyPath: propertySortKey)
-//        } else if let filter = request.localDataAccessor.filter {
-//            return databaseService?.getObjects(filter: filter)
-//        } else if let propertySortKey = request.localDataAccessor.propertySortKey {
-//            return databaseService?.getObjects(sortByKeyPath: propertySortKey)
-//        } else {
-//            return databaseService?.getObjects()
-//        }
-//    }
-//}
-
 
 // MARK: - Get Objects Publishers
 private extension DataAccessService {
@@ -261,13 +185,17 @@ private extension DataAccessService {
 
                 switch response.result {
                 case .success(let result):
-                    guard let result = result as? [[String: Any]]
-                    else { throw DataAccessError.remoteResponseUnexpected }
+                    guard let result = result as? [[String: Any]] else { throw DataAccessError.remoteResponseUnexpected }
                     // I think it would be better if we decoded into a work context in the background that's a child of the view context
                     // so only when we save there will the viewContext be updated.
-                    let objects: [T] = result.compactMap { self?.databaseService.decodeObject(with: $0) }
+
+                    let managedObjectContext = self?.databaseService.getNewChildManagedObjectContext()
+                    let objects: [T] = result.compactMap {
+                        self?.databaseService.decodeObject(with: $0, managedObjectContext: managedObjectContext)
+                    }
+
                     if let _ = dataAccessRequest.localRequest {
-                        self?.databaseService.save()
+                        self?.databaseService.save(managedObjectContext: managedObjectContext)
                         // Don't send values as the local request should already be observing changes
                         // through the db when we save.
                         return nil
@@ -286,7 +214,7 @@ private extension DataAccessService {
                 }
             }
             .mapError { error -> DataAccessError in
-                return error as? DataAccessError ?? .remoteResponseUnexpected
+                error as? DataAccessError ?? .remoteResponseUnexpected
                 //this will always be a DataAcessError as AlamoFire doesn't use combine's failure to report errors.
             }
             .eraseToAnyPublisher()

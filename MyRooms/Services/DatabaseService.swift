@@ -22,11 +22,13 @@ protocol DatabaseServiceProtocol {
     /// - Returns: A newly created instance ready be saved
     func createObject<T: Object>(_ type: T.Type) -> T
 
-    func decodeObject<T: Decodable>(with JSON: [AnyHashable: Any]) -> T?
+    func decodeObject<T: Decodable>(with JSON: [AnyHashable: Any], managedObjectContext: NSManagedObjectContext?) -> T?
+
+    func getNewChildManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType?) -> NSManagedObjectContext
 
     /// Function to save the context if there is any changes to save
     ///
-    func save()
+    func save(managedObjectContext: NSManagedObjectContext?)
 
     /// Generic function to retrieve a single object from the db according to a primary key
     ///
@@ -52,6 +54,17 @@ protocol DatabaseServiceProtocol {
     func deleteAllData()
 }
 
+extension DatabaseServiceProtocol {
+
+    func getNewChildManagedObjectContext() -> NSManagedObjectContext {
+        getNewChildManagedObjectContext(concurrencyType: nil)
+    }
+
+    func save() {
+        save(managedObjectContext: nil)
+    }
+}
+
 final class DatabaseService: DatabaseServiceProtocol {
 
     private lazy var persistentContainer: NSPersistentContainer = {
@@ -68,12 +81,6 @@ final class DatabaseService: DatabaseServiceProtocol {
 
     private var subscribers = Set<AnyCancellable>()
 
-    private lazy var decoder: JSONDecoder = {
-        let decoder = JSONDecoder()
-        decoder.userInfo[CodingUserInfoKey.managedObjectContext] = managedObjectContext
-        return decoder
-    }()
-
     required init() {
         NotificationCenter.default
             .publisher(for: UIScene.didEnterBackgroundNotification)
@@ -88,13 +95,21 @@ final class DatabaseService: DatabaseServiceProtocol {
         T(context: managedObjectContext)
     }
 
-    func decodeObject<T: Decodable>(with JSON: [AnyHashable: Any]) -> T? {
+    func decodeObject<T: Decodable>(with JSON: [AnyHashable: Any], managedObjectContext: NSManagedObjectContext?) -> T? {
         do {
             let data = try JSONSerialization.data(withJSONObject: JSON, options: .prettyPrinted)
+            let decoder = JSONDecoder()
+            decoder.userInfo[CodingUserInfoKey.managedObjectContext] = managedObjectContext ?? self.managedObjectContext
             return try decoder.decode(T.self, from: data)
         } catch {
             return nil
         }
+    }
+
+    func getNewChildManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType?) -> NSManagedObjectContext {
+        let managedObjectContext = NSManagedObjectContext(concurrencyType: concurrencyType ?? .privateQueueConcurrencyType)
+        managedObjectContext.parent = self.managedObjectContext
+        return managedObjectContext
     }
 
     func getObject<T: Object>(id: String) -> Result<T, NSError> {
@@ -187,7 +202,8 @@ final class DatabaseService: DatabaseServiceProtocol {
         }
     }
 
-    func save() {
+    func save(managedObjectContext: NSManagedObjectContext?) {
+        let managedObjectContext = managedObjectContext ?? self.managedObjectContext
         guard managedObjectContext.hasChanges else { return }
         do {
             try managedObjectContext.save()
@@ -209,66 +225,7 @@ final class DatabaseService: DatabaseServiceProtocol {
     }
 
     func deleteAllData() {
-
-        // This doesn't work: need to figure out why
-        managedObjectContext.reset()
-        save()
-
-
-//        guard let firstStoreURL = managedContext.persistentStoreCoordinator?.persistentStores.first?.url else {
-//            print("Missing first store URL - could not destroy")
-//            return
-//        }
-//
-//        do {
-//            try managedContext.persistentStoreCoordinator?.destroyPersistentStore(at: firstStoreURL, ofType: NSSQLiteStoreType, options: nil)
-//        } catch  {
-//            print("Unable to destroy persistent store: \(error) - \(error.localizedDescription)")
-//        }
-
-//        guard
-//            let persistentStore = managedContext.persistentStoreCoordinator?.persistentStores.last,
-//            let url = managedContext.persistentStoreCoordinator?.url(for: persistentStore)
-//        else {
-//            return
-//        }
-//        try? managedContext.persistentStoreCoordinator?.remove(persistentStore)
-//        try? FileManager.default.removeItem(at: url)
-//        let _ = try? managedContext.persistentStoreCoordinator?.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: "MyRooms", at: url, options: nil)
-//
-//        persistentContainer.loadPersistentStores(completionHandler: { storeDescription, error in
-//            if let error = error as NSError? {
-//                fatalError("Unresolved error \(error), \(error.userInfo)")
-//            }
-//        })
-
-
-        //create a store  NSPersistentContainer
-//        let persistentContainer = NSPersistentContainer(name: "ModelFileName")
-//        //configure settings
-//        let url = NSPersistentContainer.defaultDirectoryURL()
-//        let path = url.appendingPathComponent(persistentContainer.name)
-//        description.shouldAddStoreAsynchronously = true;//write to disk should happen on background thread
-//        self.persistentContainer.persistentStoreDescriptions = [description]
-//        //load the store
-//        persistentContainer.loadPersistentStores(completionHandler: { (storeDescription, error) in
-//            if let error = error {
-//                  fatalError("Unresolved error \(error), \(error.localizedDescription)")
-//            }
-//            //configure context for main view to automatically merge changes
-//            persistentContainer.viewContext.automaticallyMergesChangesFromParent = true
-//        });
-//        //in the view controller you can access the view context by calling
-//        persistentContainer.viewContext
-//        //if you need to make changes you can call
-//        persistentContainer.performBackgroundTask { context in
-//
-//        }
-//        //or you can get a background context
-//        let context = persistentContainer.newBackgroundContext()
-//        context.perform({
-//
-//        })
+        // TODO
     }
 
     enum ChangeType {

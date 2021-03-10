@@ -42,72 +42,72 @@ public final class ManagedObjectChangesPublisher<ResultType>: Publisher where Re
     public var value: Output? {
         return try? context.fetch(fetchRequest)
     }
+}
 
-    // MARK: - Subscription
-    final class ManagedObjectChangesSubscription<SubscriberType, ResultType>: NSObject, Subscription, NSFetchedResultsControllerDelegate
-    where
-        SubscriberType: Subscriber,
-        SubscriberType.Input == [ResultType],
-        SubscriberType.Failure == NSError,
-        ResultType: NSFetchRequestResult
-    {
-        private(set) var subscriber: SubscriberType?
-        private(set) var fetchRequest: NSFetchRequest<ResultType>?
-        private(set) var context: NSManagedObjectContext?
-        private(set) var fetchController: NSFetchedResultsController<ResultType>?
-        
-        init(subscriber: SubscriberType,
-             fetchRequest: NSFetchRequest<ResultType>,
-             context: NSManagedObjectContext) {
-            self.subscriber = subscriber
-            self.fetchRequest = fetchRequest
-            self.context = context
+// MARK: - Subscription
+final class ManagedObjectChangesSubscription<SubscriberType, ResultType>: NSObject, Subscription, NSFetchedResultsControllerDelegate
+where
+    SubscriberType: Subscriber,
+    SubscriberType.Input == [ResultType],
+    SubscriberType.Failure == NSError,
+    ResultType: NSFetchRequestResult
+{
+    private(set) var subscriber: SubscriberType?
+    private(set) var fetchRequest: NSFetchRequest<ResultType>?
+    private(set) var context: NSManagedObjectContext?
+    private(set) var fetchController: NSFetchedResultsController<ResultType>?
+
+    init(subscriber: SubscriberType,
+         fetchRequest: NSFetchRequest<ResultType>,
+         context: NSManagedObjectContext) {
+        self.subscriber = subscriber
+        self.fetchRequest = fetchRequest
+        self.context = context
+    }
+
+    func request(_ demand: Subscribers.Demand) {
+        guard
+            demand > 0,
+            let subscriber = subscriber,
+            let fetchRequest = fetchRequest,
+            let context = context
+        else {
+            return
         }
-        
-        func request(_ demand: Subscribers.Demand) {
-            guard
-                demand > 0,
-                let subscriber = subscriber,
-                let fetchRequest = fetchRequest,
-                let context = context
-            else {
-                return
+        fetchController = NSFetchedResultsController(
+            fetchRequest: fetchRequest,
+            managedObjectContext: context,
+            sectionNameKeyPath: nil,
+            cacheName: nil
+        )
+        fetchController?.delegate = self
+
+        do {
+            try fetchController?.performFetch()
+            if let fetchedObjects = fetchController?.fetchedObjects {
+                _ = subscriber.receive(fetchedObjects)
             }
-            fetchController = NSFetchedResultsController(
-                fetchRequest: fetchRequest,
-                managedObjectContext: context,
-                sectionNameKeyPath: nil,
-                cacheName: nil
-            )
-            fetchController?.delegate = self
-            
-            do {
-                try fetchController?.performFetch()
-                if let fetchedObjects = fetchController?.fetchedObjects {
-                    _ = subscriber.receive(fetchedObjects)
-                }
-            } catch {
-                subscriber.receive(completion: .failure(error as NSError))
-            }
+        } catch {
+            subscriber.receive(completion: .failure(error as NSError))
         }
-        
-        func cancel() {
-            subscriber = nil
-            fetchController = nil
-            fetchRequest = nil
-            context = nil
+    }
+
+    func cancel() {
+        subscriber = nil
+        fetchController = nil
+        fetchRequest = nil
+        context = nil
+    }
+
+    // MARK: - NSFetchedResultsControllerDelegate
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        guard
+            let subscriber = subscriber,
+            controller == fetchController,
+            let fetchedObjects = fetchController?.fetchedObjects
+        else {
+            return
         }
-        
-        // MARK: - NSFetchedResultsControllerDelegate
-        func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-            guard
-                let subscriber = subscriber,
-                controller == fetchController,
-                let fetchedObjects = fetchController?.fetchedObjects
-            else {
-                return
-            }
-            _ = subscriber.receive(fetchedObjects)
-        }
+        _ = subscriber.receive(fetchedObjects)
     }
 }
