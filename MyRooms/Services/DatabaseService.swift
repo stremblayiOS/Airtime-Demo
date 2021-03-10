@@ -22,11 +22,13 @@ protocol DatabaseServiceProtocol {
     /// - Returns: A newly created instance ready be saved
     func createObject<T: Object>(_ type: T.Type) -> T
 
-    func decodeObject<T: Decodable>(with JSON: [AnyHashable: Any]) -> T?
+    func decodeObject<T: Decodable>(with JSON: [AnyHashable: Any], managedObjectContext: NSManagedObjectContext?) -> T?
+
+    func managedObjectContext(_ contextType: DatabaseService.ContextType) -> NSManagedObjectContext
 
     /// Function to save the context if there is any changes to save
     ///
-    func save()
+    func save(managedObjectContext: NSManagedObjectContext)
 
     /// Generic function to retrieve a single object from the db according to a primary key
     ///
@@ -54,6 +56,12 @@ protocol DatabaseServiceProtocol {
 
 final class DatabaseService: DatabaseServiceProtocol {
 
+    enum ContextType {
+        case main
+        case background
+        case temporary
+    }
+
     private lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "MyRooms")
         container.loadPersistentStores(completionHandler: { storeDescription, error in
@@ -66,20 +74,27 @@ final class DatabaseService: DatabaseServiceProtocol {
 
     private lazy var managedObjectContext: NSManagedObjectContext = persistentContainer.viewContext
 
-    private var subscribers = Set<AnyCancellable>()
-
-    private lazy var decoder: JSONDecoder = {
-        let decoder = JSONDecoder()
-        decoder.userInfo[CodingUserInfoKey.managedObjectContext] = managedObjectContext
-        return decoder
+    private lazy var backgroundManagedObjectContext: NSManagedObjectContext = {
+        let managedObjectContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
+        managedObjectContext.parent = self.managedObjectContext
+        return managedObjectContext
     }()
+
+    private lazy var temporaryManagedObjectContext: NSManagedObjectContext = {
+        let managedObjectContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
+        managedObjectContext.parent = self.managedObjectContext
+        return managedObjectContext
+    }()
+
+    private var subscribers = Set<AnyCancellable>()
 
     required init() {
         NotificationCenter.default
             .publisher(for: UIScene.didEnterBackgroundNotification)
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: { [weak self] _ in
-                self?.save()
+                guard let self = self else { return }
+                self.save(managedObjectContext: self.managedObjectContext)
             })
             .store(in: &subscribers)
     }
@@ -88,12 +103,25 @@ final class DatabaseService: DatabaseServiceProtocol {
         T(context: managedObjectContext)
     }
 
-    func decodeObject<T: Decodable>(with JSON: [AnyHashable: Any]) -> T? {
+    func decodeObject<T: Decodable>(with JSON: [AnyHashable: Any], managedObjectContext: NSManagedObjectContext?) -> T? {
         do {
             let data = try JSONSerialization.data(withJSONObject: JSON, options: .prettyPrinted)
+            let decoder = JSONDecoder()
+            decoder.userInfo[CodingUserInfoKey.managedObjectContext] = managedObjectContext ?? self.managedObjectContext
             return try decoder.decode(T.self, from: data)
         } catch {
             return nil
+        }
+    }
+
+    func managedObjectContext(_ contextType: DatabaseService.ContextType) -> NSManagedObjectContext {
+        switch contextType {
+            case .main:
+                return managedObjectContext
+            case .background:
+                return backgroundManagedObjectContext
+            case .temporary:
+                return temporaryManagedObjectContext
         }
     }
 
@@ -181,14 +209,14 @@ final class DatabaseService: DatabaseServiceProtocol {
                 NSDeletedObjectsKey: result.result as! [NSManagedObjectID]
             ]
             NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [managedObjectContext])
-            save()
+            save(managedObjectContext: managedObjectContext)
         } catch {
             fatalError("Error deleting objects: \(error.localizedDescription)")
         }
     }
 
-    func save() {
-        guard managedObjectContext.hasChanges else { return }
+    func save(managedObjectContext: NSManagedObjectContext) {
+        guard managedObjectContext != self.managedObjectContext(.temporary), managedObjectContext.hasChanges else { return }
         do {
             try managedObjectContext.save()
         } catch {
@@ -209,66 +237,7 @@ final class DatabaseService: DatabaseServiceProtocol {
     }
 
     func deleteAllData() {
-
-        // This doesn't work: need to figure out why
-        managedObjectContext.reset()
-        save()
-
-
-//        guard let firstStoreURL = managedContext.persistentStoreCoordinator?.persistentStores.first?.url else {
-//            print("Missing first store URL - could not destroy")
-//            return
-//        }
-//
-//        do {
-//            try managedContext.persistentStoreCoordinator?.destroyPersistentStore(at: firstStoreURL, ofType: NSSQLiteStoreType, options: nil)
-//        } catch  {
-//            print("Unable to destroy persistent store: \(error) - \(error.localizedDescription)")
-//        }
-
-//        guard
-//            let persistentStore = managedContext.persistentStoreCoordinator?.persistentStores.last,
-//            let url = managedContext.persistentStoreCoordinator?.url(for: persistentStore)
-//        else {
-//            return
-//        }
-//        try? managedContext.persistentStoreCoordinator?.remove(persistentStore)
-//        try? FileManager.default.removeItem(at: url)
-//        let _ = try? managedContext.persistentStoreCoordinator?.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: "MyRooms", at: url, options: nil)
-//
-//        persistentContainer.loadPersistentStores(completionHandler: { storeDescription, error in
-//            if let error = error as NSError? {
-//                fatalError("Unresolved error \(error), \(error.userInfo)")
-//            }
-//        })
-
-
-        //create a store  NSPersistentContainer
-//        let persistentContainer = NSPersistentContainer(name: "ModelFileName")
-//        //configure settings
-//        let url = NSPersistentContainer.defaultDirectoryURL()
-//        let path = url.appendingPathComponent(persistentContainer.name)
-//        description.shouldAddStoreAsynchronously = true;//write to disk should happen on background thread
-//        self.persistentContainer.persistentStoreDescriptions = [description]
-//        //load the store
-//        persistentContainer.loadPersistentStores(completionHandler: { (storeDescription, error) in
-//            if let error = error {
-//                  fatalError("Unresolved error \(error), \(error.localizedDescription)")
-//            }
-//            //configure context for main view to automatically merge changes
-//            persistentContainer.viewContext.automaticallyMergesChangesFromParent = true
-//        });
-//        //in the view controller you can access the view context by calling
-//        persistentContainer.viewContext
-//        //if you need to make changes you can call
-//        persistentContainer.performBackgroundTask { context in
-//
-//        }
-//        //or you can get a background context
-//        let context = persistentContainer.newBackgroundContext()
-//        context.perform({
-//
-//        })
+        // TODO
     }
 
     enum ChangeType {
