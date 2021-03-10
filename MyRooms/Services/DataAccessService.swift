@@ -189,18 +189,22 @@ private extension DataAccessService {
                     // I think it would be better if we decoded into a work context in the background that's a child of the view context
                     // so only when we save there will the viewContext be updated.
 
-                    let managedObjectContext = self?.databaseService.getNewChildManagedObjectContext()
-                    let objects: [T] = result.compactMap {
-                        self?.databaseService.decodeObject(with: $0, managedObjectContext: managedObjectContext)
-                    }
-
                     if let _ = dataAccessRequest.localRequest {
-                        self?.databaseService.save(managedObjectContext: managedObjectContext)
+                        let managedObjectContext = self?.databaseService.getNewChildManagedObjectContext()
+                        managedObjectContext?.performAndWait {
+                            result.forEach {
+                                let _: T? = self?.databaseService.decodeObject(with: $0, managedObjectContext: managedObjectContext)
+                            }
+                            self?.databaseService.save(managedObjectContext: managedObjectContext)
+                        }
                         // Don't send values as the local request should already be observing changes
                         // through the db when we save.
                         return nil
                     } else {
-                        return objects
+                        let managedObjectContext = self?.databaseService.getNewChildManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
+                        return result.compactMap {
+                            self?.databaseService.decodeObject(with: $0, managedObjectContext: managedObjectContext)
+                        }
                     }
 
                 case .failure(let error):
