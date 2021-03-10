@@ -33,8 +33,8 @@ protocol DataAccessServiceProtocol {
     /// - Parameters:
     ///   - request: The data accessor request used to retrieve the objects
     ///   - closure: Callback triggered once the objects have been retrieved. If the objects, did not previously exsist in the local db, they will now have been downloaded and saved into the db
-    func getObjects<T>(request: DataAccessRequest, _ closure: ((Result<[T], DataAccessError>) -> Void)?) where T: Object
-    func getObjects<T>(request: DataAccessRequest) -> AnyPublisher<[T], DataAccessError> where T: Object, T: Codable
+    //func getObjects<T>(request: DataAccessRequest, _ closure: ((Result<[T], DataAccessError>) -> Void)?) where T: Object
+    func getObjects<T>(type: T.Type, request: DataAccessRequest) -> AnyPublisher<[T], DataAccessError> where T: Object, T: Codable
 
     /// Generic funtion to create/update an object according to the given data accessor request
     ///
@@ -55,8 +55,6 @@ final class DataAccessService: DataAccessServiceProtocol {
 
     private let databaseService: DatabaseServiceProtocol
     private let apiService: APIServiceProtocol
-
-    private var cancellableBag = Set<AnyCancellable>()
 
     required init(databaseService: DatabaseServiceProtocol, apiService: APIServiceProtocol) {
         self.databaseService = databaseService
@@ -109,14 +107,13 @@ final class DataAccessService: DataAccessServiceProtocol {
 
     // Combine implementations
 
-    func getObjects<T>(request: DataAccessRequest) -> AnyPublisher<[T], DataAccessError> where T: Object, T: Codable {
+    func getObjects<T>(type: T.Type, request: DataAccessRequest) -> AnyPublisher<[T], DataAccessError> where T: Object, T: Codable {
 
-        typealias ResulPublisher = AnyPublisher<[T], DataAccessError>
+        typealias ResultPublisher = AnyPublisher<[T], DataAccessError>
 
         switch (request.localRequest, request.remoteRequest) {
         case (nil, nil):
-            return Fail(outputType: [T].self, failure: DataAccessError.dataAccessRequestInvalid)
-                .eraseToAnyPublisher()
+            return Fail(outputType: [T].self, failure: DataAccessError.dataAccessRequestInvalid).eraseToAnyPublisher()
 
         case (nil, let remoteRequest?):
             return getObjectsPublisher(for: remoteRequest, dataAccessRequest: request)
@@ -125,8 +122,8 @@ final class DataAccessService: DataAccessServiceProtocol {
             return getObjectsPublisher(for: localRequest, dataAccessRequest: request)
 
         case (let localRequest?, let remoteRequest?):
-            let local: ResulPublisher = getObjectsPublisher(for: localRequest, dataAccessRequest: request)
-            let remote: ResulPublisher = getObjectsPublisher(for: remoteRequest, dataAccessRequest: request)
+            let local: ResultPublisher = getObjectsPublisher(for: localRequest, dataAccessRequest: request)
+            let remote: ResultPublisher = getObjectsPublisher(for: remoteRequest, dataAccessRequest: request)
 
             return Publishers
                 .Merge(local, remote)
@@ -245,28 +242,22 @@ final class DataAccessService: DataAccessServiceProtocol {
 // MARK: - Get Objects Publishers
 private extension DataAccessService {
 
-    private func getObjectsPublisher<T>(
-        for localRequest: LocalRequest,
-        dataAccessRequest: DataAccessRequest) -> AnyPublisher<[T], DataAccessError>
-    where T: Object, T: Codable {
-
-        return databaseService.getObjects(predicate: localRequest.filter)
-            .mapError({ error -> DataAccessError in
+    func getObjectsPublisher<T>(for localRequest: LocalRequest, dataAccessRequest: DataAccessRequest) -> AnyPublisher<[T], DataAccessError> where T: Object, T: Codable {
+        databaseService
+            .getObjects(predicate: localRequest.filter)
+            .mapError { error -> DataAccessError in
                 .database(error: error)
-            })
+            }
             .eraseToAnyPublisher()
     }
 
-    private func getObjectsPublisher<T>(
-        for remoteRequest: RemoteRequest,
-        dataAccessRequest: DataAccessRequest) -> AnyPublisher<[T], DataAccessError>
-    where T: Object, T: Codable {
-        return apiService
+    func getObjectsPublisher<T>(for remoteRequest: RemoteRequest, dataAccessRequest: DataAccessRequest) -> AnyPublisher<[T], DataAccessError> where T: Object, T: Codable {
+        apiService
             .dataRequest(for: remoteRequest)
             .publishResponse(using: JSONResponseSerializer())
             // We are decoding here and then again on the next step, we should only get the Data here and
             // decode from data once on the next step. we could even use the .decode() function in Combine.
-            .tryCompactMap { [weak self] (response) throws -> [T]? in
+            .tryCompactMap { [weak self] response throws -> [T]? in
 
                 switch response.result {
                 case .success(let result):

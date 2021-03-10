@@ -18,13 +18,6 @@ enum MyRoomsKeys: String, Localizable {
 /// Trend List View Model
 protocol MyRoomsViewModel: class {
 
-    /*
-     The case against Published
-
-     I'd love to have used @Published property wrappers, but they can't be accessed through a protocol as far as I found.
-     There were some hacky solutions but I figured it was simpler to just expose the properties as `CurrentValueSubject`.
-     */
-
     /// Title of the screen. To be shown on the navigation bar.
     var title: AnyPublisher<String?, Never> { get }
 
@@ -32,7 +25,7 @@ protocol MyRoomsViewModel: class {
     var isLoading: AnyPublisher<Bool, Never> { get }
 
     /// The cell view models to be shown by the UI.
-    var listItems: AnyPublisher<[TrendListCellViewModel], Never> { get }
+    var cellViewModels: AnyPublisher<[MyRoomsCellViewModel], Never> { get }
 
     /// Retrieves the list again from the backend. To be used by pull to refresh
     func reload()
@@ -42,53 +35,42 @@ protocol MyRoomsViewModel: class {
 }
 
 /// Implementation
-final class TrendListViewModelImplementation: MyRoomsViewModel {
+final class MyRoomsViewModelImplementation: MyRoomsViewModel {
 
-    var title = CurrentValueSubject<String?, Never>(MyRoomsKeys.title.localized)
+    var titleSubject = CurrentValueSubject<String?, Never>(MyRoomsKeys.title.localized)
+    var title: AnyPublisher<String?, Never> { titleSubject.eraseToAnyPublisher() }
 
-    var isLoading = CurrentValueSubject<Bool, Never>(false)
+    var isLoadingSubject = CurrentValueSubject<Bool, Never>(false)
+    var isLoading: AnyPublisher<Bool, Never> { isLoadingSubject.eraseToAnyPublisher() }
 
-    var listItems = CurrentValueSubject<[TrendListCellViewModel], Never>([])
+    var cellViewModelsSubject = CurrentValueSubject<[MyRoomsCellViewModel], Never>([])
+    var cellViewModels: AnyPublisher<[MyRoomsCellViewModel], Never> { cellViewModelsSubject.eraseToAnyPublisher() }
 
     var noContentDescription = CurrentValueSubject<String?, Never>(nil)
 
     private var dataAccessService: DataAccessServiceProtocol?
 
-    private var repositoriesObserver: NotificationToken?
-    private var repositories: DataAccessResults<Repository>? {
-        didSet {
-            guard oldValue == nil else { return }
-            repositoriesObserver = repositories?.observe { [weak self] repos in
-                self?.reloadCellViewModels()
-            }
-        }
-    }
+    private var getRoomsCancellable: AnyCancellable?
+
+
 
     init(dataAccessService: DataAccessServiceProtocol?) {
         self.dataAccessService = dataAccessService
+        reload()
     }
 
     func reload() {
-        dataAccessService?.getObjects(request: RepositoryDataAccessor.getAll) { [weak self] (response: Response<DataAccessResults<Repository>, DataAccessError>) in
-            switch response {
-            case .success(let repositories):
-                self?.repositories = repositories
-            case .failure:
-                break
-            }
-        }
-    }
+        getRoomsCancellable?.cancel()
 
-    private func reloadCellViewModels() {
+        getRoomsCancellable = dataAccessService?
+            .getObjects(type: Room.self, request: RoomDataAccessRequest.myRooms)
+            //TODO: handle loading state and error alert here
+            .map { $0.compactMap { MyRoomsCellViewModelImplementation(room: $0) } } //TODO: handle with DI
+            .sink(receiveCompletion: { _ in
 
-        guard let repositories = repositories else { return }
-
-        var items = [TrendListCellViewModel]()
-        var iterator = repositories.makeIterator()
-        while let item = iterator.next() {
-            items.append(TrendListCellViewModel(repository: item))
-        }
-        listItems.value = items
+            }, receiveValue: { [weak self] cellViewModels in
+                self?.cellViewModelsSubject.value = cellViewModels
+            })
     }
 }
 
@@ -101,16 +83,29 @@ enum MyRoomsCellKeys: String, Localizable {
     case starCount = "my_rooms___cell___starCount"
 }
 
-final class MyRoomsCellViewModel: Hashable {
+protocol MyRoomsCellViewModel {
 
-    static func == (lhs: MyRoomsCellViewModel, rhs: MyRoomsCellViewModel) -> Bool {
+    var title: CurrentValueSubject<String?, Never> { get }
+    var subtitle: CurrentValueSubject<String?, Never> { get }
+
+}
+
+final class MyRoomsCellViewModelImplementation: MyRoomsCellViewModel, Hashable {
+
+
+    func hash(into hasher: inout Hasher) {
+        room.hash(into: &hasher)
+    }
+
+    static func == (lhs: MyRoomsCellViewModelImplementation, rhs: MyRoomsCellViewModelImplementation) -> Bool {
         lhs.room == rhs.room
     }
 
-    @Published var title: String? = nil
-    @Published var subtitle: String? = nil
+    var title = CurrentValueSubject<String?, Never>(nil)
+    var subtitle = CurrentValueSubject<String?, Never>(nil)
 
-    private var room: Room?
+    private var room: Room
+    private var cancellable: AnyCancellable?
 
     init?(room: Room? = nil) {
 
@@ -118,10 +113,14 @@ final class MyRoomsCellViewModel: Hashable {
 
         self.room = room
 
-        room.objectWillChange.sink { [weak self] in
-            self?.title = room.name
-            self?.subtitle = room.id
+        loadRoomInfo()
+        cancellable = room.objectWillChange.sink { [weak self] in
+            self?.loadRoomInfo()
         }
+    }
 
+    func loadRoomInfo() {
+        title.value = room.name
+        subtitle.value = room.isLive == true ? "live" : "non-live"
     }
 }

@@ -36,7 +36,7 @@ final class MyRoomsLiveViewController: UITableViewController {
 
         setup()
 
-        dataAccessService.getObjects(request: RoomDataAccessRequest.myRoomsLive).sink { _ in } receiveValue: { [weak self] (rooms: [Room]) in
+        dataAccessService.getObjects(type: Room.self, request: RoomDataAccessRequest.myRoomsLive).sink { _ in } receiveValue: { [weak self] (rooms: [Room]) in
             self?.rooms = rooms
         }.store(in: &cancellableBag)
     }
