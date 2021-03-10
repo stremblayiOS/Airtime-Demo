@@ -7,7 +7,6 @@
 
 import Alamofire
 
-//TODO: Change Error to LocalizedError and implement localizations that are user ready.
 enum DataAccessError: Error {
 
     /// Remote request failed with an AlamoFire error.
@@ -21,4 +20,9 @@ enum DataAccessError: Error {
 
     /// The DataAccessRequest is invalid as it's missing the remote and local request. It needs at least one.
     case dataAccessRequestInvalid
+}
+
+//TODO: implement localizations that are user ready.
+extension DataAccessError: LocalizedError {
+    
 }

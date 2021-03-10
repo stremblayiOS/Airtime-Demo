@@ -1,0 +1,16 @@
+/* 
+  Localization.strings
+  MyRooms
+
+  Created by Germán Azcona on 10/03/2021.
+  
+*/
+
+"my_rooms___title" = "My Rooms";
+"my_rooms___cell___live" = "live";
+"my_rooms___cell___not_live" = "not live";
+
+"generic__error_alert___title" = "Error";
+"generic__success_alert___title" = "Success!";
+"generic__alert___ok" = "Ok";
+

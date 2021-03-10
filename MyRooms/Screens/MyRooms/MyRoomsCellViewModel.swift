@@ -10,8 +10,8 @@ import Combine
 
 /// Keys to be used for localization and accesibility
 enum MyRoomsCellKeys: String, Localizable {
-    case live = "my_rooms___cell___live"
-    case notLive = "my_rooms___cell___not_live"
+    case live =     "my_rooms___cell___live"
+    case notLive =  "my_rooms___cell___not_live"
 }
 
 protocol MyRoomsCellViewModel {

@@ -1,0 +1,11 @@
+/* 
+  Localization.strings
+  MyRooms
+
+  Created by Germán Azcona on 10/03/2021.
+  
+*/
+
+"my_rooms___title" = "Mis Habitaciones";
+"my_rooms___cell___live" = "en vivo";
+"my_rooms___cell___not_live" = "no en vivo";

@@ -23,6 +23,9 @@ protocol MyRoomsViewModel: class {
     /// If it's loading the first time or after pull to refresh is triggered this becomes true.
     var isLoading: CurrentValueSubject<Bool, Never> { get }
 
+    /// An error to be shown if something is wrong
+    var localizedErrorMessage: CurrentValueSubject<String?, Never> { get }
+
     /// The cell view models to be shown by the UI.
     var cellViewModels: CurrentValueSubject<[MyRoomsCellViewModel], Never> { get }
 
@@ -40,6 +43,8 @@ final class MyRoomsViewModelImplementation: MyRoomsViewModel {
 
     var isLoading = CurrentValueSubject<Bool, Never>(false)
 
+    var localizedErrorMessage = CurrentValueSubject<String?, Never>(nil)
+
     var cellViewModels = CurrentValueSubject<[MyRoomsCellViewModel], Never>([])
 
     var noContentDescription = CurrentValueSubject<String?, Never>(nil)
@@ -47,8 +52,6 @@ final class MyRoomsViewModelImplementation: MyRoomsViewModel {
     private var dataAccessService: DataAccessServiceProtocol?
 
     private var getRoomsCancellable: AnyCancellable?
-
-
 
     init(dataAccessService: DataAccessServiceProtocol?) {
         self.dataAccessService = dataAccessService
@@ -60,7 +63,8 @@ final class MyRoomsViewModelImplementation: MyRoomsViewModel {
 
         getRoomsCancellable = dataAccessService?
             .getObjects(type: Room.self, request: RoomDataAccessRequest.myRooms)
-            //TODO: handle loading state and error alert here
+            .trackLoading(to: \.isLoading.value, onWeak: self)
+            .trackLocalizableErrorDescription(to: \.localizedErrorMessage.value, onWeak: self)
             .map { $0.compactMap { MyRoomsCellViewModelImplementation(room: $0) } } //TODO: handle with DI
             .sink(receiveCompletion: { _ in
 

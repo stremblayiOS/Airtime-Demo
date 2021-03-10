@@ -51,21 +51,10 @@ final class MyRoomsViewController: UITableViewController {
         setup()
     }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        rooms.count
-    }
-
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "")
-
-        cell.textLabel?.text = rooms[indexPath.row].name
-        cell.detailTextLabel?.text = rooms[indexPath.row].isLive == true ? "live" : "non-live"
-
-        return cell
-    }
-
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        guard traitCollection.hasDifferentSizeOrColor(comparedTo: previousTraitCollection) else { return }
+        setupStyles()
     }
 }
 
@@ -90,12 +79,13 @@ private extension MyRoomsViewController {
 
         navigationItem.rightBarButtonItems = [trashBarButtonItem, addBarButtonItem]
 
+        tableView.register(MyRoomsCell.self, forCellReuseIdentifier: MyRoomsCell.reuseIdentifier)
+
         dataSource = DataSource(
             tableView: tableView,
             cellProvider: { (tableView, indexPath, cellViewModel) -> UITableViewCell? in
-                let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "MyRoomsCell") //TODO: Dequeue reusable
-                cell.textLabel?.text = cellViewModel.title.value
-                cell.detailTextLabel?.text = cellViewModel.subtitle.value
+                guard let cell = tableView.dequeueReusableCell(withIdentifier: MyRoomsCell.reuseIdentifier, for: indexPath) as? MyRoomsCell else { return UITableViewCell() }
+                cell.setViewModel(cellViewModel)
                 return cell
             }
         )
@@ -105,7 +95,7 @@ private extension MyRoomsViewController {
     }
 
     func setupConstraints() {
-        // Autolayout code
+        // Autolayout code if needed
     }
 
     // Setup sizes, fonts and colors. This will be called several times as the user changes content size and turns dark mode on/off.
@@ -116,11 +106,13 @@ private extension MyRoomsViewController {
 
         viewModel
             .title
+            .receive(on: DispatchQueue.main)
             .assign(to: \.title, onWeak: self)
             .store(in: &cancellables)
 
         viewModel
             .cellViewModels
+            .receive(on: DispatchQueue.main)
             .map { $0 as! [MyRoomsCellViewModelImplementation] }
             .sink { [weak self] cellsViewModels in
                 guard let self = self else { return }
@@ -128,6 +120,32 @@ private extension MyRoomsViewController {
                 self.snapshot.appendSections([""])
                 self.snapshot.appendItems(cellsViewModels)
                 self.dataSource.apply(self.snapshot)
+            }
+            .store(in: &cancellables)
+
+
+        viewModel
+            .localizedErrorMessage
+            .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { localizedErrorMessage in
+                self.presentAlert(with: .init(errorMessage: localizedErrorMessage))
+            })
+            .store(in: &cancellables)
+
+        viewModel
+            .isLoading
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { isLoading in
+                // TODO: handle loading on any view controller
+                // Delay animation for 1.5 seconds (or so) and cancel directly if 1.5 seconds wasn't reached.
+                // also, once displayed, display for 2 seconds (or so) minimum so the loading doesn't flash.
+                // example interfaces
+                // self.showLoading = isLoading
+                // isLoading ? self.presentLoading() : self.dismissLoading()
+                // isLoading ? someActivityIndicator.startAnimating() ? someActivityIndicator.stopAnimating()
+                // etc...
             }
             .store(in: &cancellables)
     }
