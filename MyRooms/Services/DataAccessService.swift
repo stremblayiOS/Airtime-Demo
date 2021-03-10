@@ -95,7 +95,7 @@ final class DataAccessService: DataAccessServiceProtocol {
 
     func saveObject<T>(request: DataAccessRequest, _ closure: ((Result<T, DataAccessError>) -> Void)?) where T: Object {
         if let _ = request.localRequest {
-            databaseService.save()
+            databaseService.save(managedObjectContext: databaseService.managedObjectContext(.main))
         }
     }
 
@@ -182,28 +182,27 @@ private extension DataAccessService {
             // We are decoding here and then again on the next step, we should only get the Data here and
             // decode from data once on the next step. we could even use the .decode() function in Combine.
             .tryCompactMap { [weak self] response throws -> [T]? in
+                guard let self = self else { return nil }
 
                 switch response.result {
                 case .success(let result):
                     guard let result = result as? [[String: Any]] else { throw DataAccessError.remoteResponseUnexpected }
-                    // I think it would be better if we decoded into a work context in the background that's a child of the view context
-                    // so only when we save there will the viewContext be updated.
 
                     if let _ = dataAccessRequest.localRequest {
-                        let managedObjectContext = self?.databaseService.getNewChildManagedObjectContext()
-                        managedObjectContext?.performAndWait {
-                            result.forEach {
-                                let _: T? = self?.databaseService.decodeObject(with: $0, managedObjectContext: managedObjectContext)
+                        let managedObjectContext = self.databaseService.managedObjectContext(.background)
+                        managedObjectContext.performAndWait {
+                            let _: [T] = result.compactMap {
+                                self.databaseService.decodeObject(with: $0, managedObjectContext: managedObjectContext)
                             }
-                            self?.databaseService.save(managedObjectContext: managedObjectContext)
+                            self.databaseService.save(managedObjectContext: managedObjectContext)
                         }
                         // Don't send values as the local request should already be observing changes
                         // through the db when we save.
                         return nil
                     } else {
-                        let managedObjectContext = self?.databaseService.getNewChildManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
+                        let managedObjectContext = self.databaseService.managedObjectContext(.temporary)
                         return result.compactMap {
-                            self?.databaseService.decodeObject(with: $0, managedObjectContext: managedObjectContext)
+                            self.databaseService.decodeObject(with: $0, managedObjectContext: managedObjectContext)
                         }
                     }
 

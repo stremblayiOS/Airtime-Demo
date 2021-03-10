@@ -24,11 +24,11 @@ protocol DatabaseServiceProtocol {
 
     func decodeObject<T: Decodable>(with JSON: [AnyHashable: Any], managedObjectContext: NSManagedObjectContext?) -> T?
 
-    func getNewChildManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType?) -> NSManagedObjectContext
+    func managedObjectContext(_ contextType: DatabaseService.ContextType) -> NSManagedObjectContext
 
     /// Function to save the context if there is any changes to save
     ///
-    func save(managedObjectContext: NSManagedObjectContext?)
+    func save(managedObjectContext: NSManagedObjectContext)
 
     /// Generic function to retrieve a single object from the db according to a primary key
     ///
@@ -54,18 +54,13 @@ protocol DatabaseServiceProtocol {
     func deleteAllData()
 }
 
-extension DatabaseServiceProtocol {
-
-    func getNewChildManagedObjectContext() -> NSManagedObjectContext {
-        getNewChildManagedObjectContext(concurrencyType: nil)
-    }
-
-    func save() {
-        save(managedObjectContext: nil)
-    }
-}
-
 final class DatabaseService: DatabaseServiceProtocol {
+
+    enum ContextType {
+        case main
+        case background
+        case temporary
+    }
 
     private lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "MyRooms")
@@ -79,6 +74,18 @@ final class DatabaseService: DatabaseServiceProtocol {
 
     private lazy var managedObjectContext: NSManagedObjectContext = persistentContainer.viewContext
 
+    private lazy var backgroundManagedObjectContext: NSManagedObjectContext = {
+        let managedObjectContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
+        managedObjectContext.parent = self.managedObjectContext
+        return managedObjectContext
+    }()
+
+    private lazy var temporaryManagedObjectContext: NSManagedObjectContext = {
+        let managedObjectContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
+        managedObjectContext.parent = self.managedObjectContext
+        return managedObjectContext
+    }()
+
     private var subscribers = Set<AnyCancellable>()
 
     required init() {
@@ -86,7 +93,8 @@ final class DatabaseService: DatabaseServiceProtocol {
             .publisher(for: UIScene.didEnterBackgroundNotification)
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: { [weak self] _ in
-                self?.save()
+                guard let self = self else { return }
+                self.save(managedObjectContext: self.managedObjectContext)
             })
             .store(in: &subscribers)
     }
@@ -106,10 +114,15 @@ final class DatabaseService: DatabaseServiceProtocol {
         }
     }
 
-    func getNewChildManagedObjectContext(concurrencyType: NSManagedObjectContextConcurrencyType?) -> NSManagedObjectContext {
-        let managedObjectContext = NSManagedObjectContext(concurrencyType: concurrencyType ?? .privateQueueConcurrencyType)
-        managedObjectContext.parent = self.managedObjectContext
-        return managedObjectContext
+    func managedObjectContext(_ contextType: DatabaseService.ContextType) -> NSManagedObjectContext {
+        switch contextType {
+            case .main:
+                return managedObjectContext
+            case .background:
+                return backgroundManagedObjectContext
+            case .temporary:
+                return temporaryManagedObjectContext
+        }
     }
 
     func getObject<T: Object>(id: String) -> Result<T, NSError> {
@@ -196,15 +209,14 @@ final class DatabaseService: DatabaseServiceProtocol {
                 NSDeletedObjectsKey: result.result as! [NSManagedObjectID]
             ]
             NSManagedObjectContext.mergeChanges(fromRemoteContextSave: changes, into: [managedObjectContext])
-            save()
+            save(managedObjectContext: managedObjectContext)
         } catch {
             fatalError("Error deleting objects: \(error.localizedDescription)")
         }
     }
 
-    func save(managedObjectContext: NSManagedObjectContext?) {
-        let managedObjectContext = managedObjectContext ?? self.managedObjectContext
-        guard managedObjectContext.hasChanges else { return }
+    func save(managedObjectContext: NSManagedObjectContext) {
+        guard managedObjectContext != self.managedObjectContext(.temporary), managedObjectContext.hasChanges else { return }
         do {
             try managedObjectContext.save()
         } catch {
