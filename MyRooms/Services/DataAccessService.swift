@@ -128,39 +128,6 @@ final class DataAccessService: DataAccessServiceProtocol {
             return Publishers.Merge(local, remote).eraseToAnyPublisher()
         }
     }
-
-//    func getObjects<T>(request: DataAccessRequest) -> AnyPublisher<[T], DataAccessError> where T: Object, T: Codable {
-//        let subject = PassthroughSubject<[T], DataAccessError>()
-//
-//        if let localRequest = request.localRequest {
-//            databaseService.getObjects(predicate: localRequest.filter).sink { _ in
-//                subject.send(completion: .failure(.database))
-//            } receiveValue: { (objects: [T]) in
-//                subject.send(objects)
-//            }.store(in: &cancellableBag)
-//        }
-//
-//        if let remoteRequest = request.remoteRequest {
-//            apiService.dataRequest(for: remoteRequest).responseJSON { [weak self] response in
-//
-//                switch response.result {
-//                case .success(let result):
-//                    guard let result = result as? [[String: Any]] else { return }
-//
-//                    let objects: [T] = result.compactMap { self?.databaseService.decodeObject(with: $0) }
-//                    if let _ = request.localRequest {
-//                        self?.databaseService.save()
-//                    } else {
-//                        subject.send(objects)
-//                    }
-//                case .failure(let error):
-//                    subject.send(completion: .failure(.remote(error: error)))
-//                }
-//            }
-//        }
-//
-//        return subject.eraseToAnyPublisher()
-//    }
 }
 
 // MARK: - Get Objects Publishers
