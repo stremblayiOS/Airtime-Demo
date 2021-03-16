@@ -169,6 +169,8 @@ private extension DataAccessService {
                                 self.databaseService.decodeObject(with: $0, managedObjectContext: managedObjectContext)
                             }
                             self.databaseService.save(managedObjectContext: managedObjectContext)
+                            // TODO: find a better way to save the parent
+                            self.databaseService.save(managedObjectContext: self.databaseService.managedObjectContext(.main))
                         }
                         // Don't send values as the local request should already be observing changes
                         // through the db when we save.
