@@ -15,7 +15,7 @@ enum RoomRouter: URLRequestConvertible, RouterProtocol {
     func route() -> Route {
         switch self {
         case .rooms:
-            return (.get, "/rooms", [:])
+            return (.get, "/api/v1/rooms", [:])
         case .deleteAll:
             return (.delete, "/rooms", [:])
         case .create(let room):

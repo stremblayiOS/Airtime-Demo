@@ -72,17 +72,23 @@ final class DatabaseService: DatabaseServiceProtocol {
         return container
     }()
 
-    private lazy var managedObjectContext: NSManagedObjectContext = persistentContainer.viewContext
+    private lazy var managedObjectContext: NSManagedObjectContext = {
+        let managedObjectContext = persistentContainer.viewContext
+        managedObjectContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        return managedObjectContext
+    }()
 
     private lazy var backgroundManagedObjectContext: NSManagedObjectContext = {
         let managedObjectContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
         managedObjectContext.parent = self.managedObjectContext
+        managedObjectContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         return managedObjectContext
     }()
 
     private lazy var temporaryManagedObjectContext: NSManagedObjectContext = {
         let managedObjectContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
         managedObjectContext.parent = self.managedObjectContext
+        managedObjectContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         return managedObjectContext
     }()
 

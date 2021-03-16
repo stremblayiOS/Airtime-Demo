@@ -13,24 +13,28 @@ PODS:
   - OHHTTPStubs/OHPathHelpers (9.1.0)
   - OHHTTPStubs/Swift (9.1.0):
     - OHHTTPStubs/Default
+  - SwiftKeychainWrapper (4.0.1)
   - Swinject (2.7.1)
 
 DEPENDENCIES:
   - Alamofire
   - OHHTTPStubs/Swift
+  - SwiftKeychainWrapper
   - Swinject
 
 SPEC REPOS:
   trunk:
     - Alamofire
     - OHHTTPStubs
+    - SwiftKeychainWrapper
     - Swinject
 
 SPEC CHECKSUMS:
   Alamofire: 2291f7d21ca607c491dd17642e5d40fdcda0e65c
   OHHTTPStubs: 90eac6d8f2c18317baeca36698523dc67c513831
+  SwiftKeychainWrapper: 807ba1d63c33a7d0613288512399cd1eda1e470c
   Swinject: ddf78b8486dd9b71a667b852cad919ab4484478e
 
-PODFILE CHECKSUM: 5e84a817c4ee62ddd4208ec8d286741d0daee4df
+PODFILE CHECKSUM: 3a083014509a43619a57f3728eb78e492ebf078b
 
 COCOAPODS: 1.10.0

@@ -34,7 +34,7 @@ enum RoomDataAccessRequest: DataAccessRequest {
         case .myRooms:
             return (object: nil, id: nil, filter: nil, propertySortKey: nil, ascending: true)
         case .myRoomsLive:
-            return (object: nil, id: nil, filter: NSPredicate(format: "isLive == true"), propertySortKey: nil, ascending: true)
+            return (object: nil, id: nil, filter: NSPredicate(format: "live == true"), propertySortKey: nil, ascending: true)
         case .create(let room):
             return (object: room, id: nil, filter: nil, propertySortKey: nil, ascending: true)
         case .deleteAllRooms:

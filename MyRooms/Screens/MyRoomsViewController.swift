@@ -58,8 +58,8 @@ final class MyRoomsViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "")
 
-        cell.textLabel?.text = rooms[indexPath.row].name
-        cell.detailTextLabel?.text = rooms[indexPath.row].isLive == true ? "live" : "non-live"
+        cell.textLabel?.text = rooms[indexPath.row].title
+//        cell.detailTextLabel?.text = rooms[indexPath.row].isLive == true ? "live" : "non-live"
 
         return cell
     }
@@ -131,8 +131,7 @@ private extension MyRoomsViewController {
         // 1. Create the object and set paramaters
         let room = dataAccessService.createObject(Room.self)
         room.id = UUID().uuidString
-        room.name = UUID().uuidString
-        room.isLive = Bool.random()
+        room.title = UUID().uuidString
 
         // 2. Create the request
         let request = RoomDataAccessRequest.create(room: room)

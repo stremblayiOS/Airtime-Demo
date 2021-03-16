@@ -6,6 +6,7 @@ target 'MyRooms' do
     pod 'Alamofire'
     pod 'Swinject'
     pod 'OHHTTPStubs/Swift'
+    pod 'SwiftKeychainWrapper'
 end
 
 post_install do |installer|

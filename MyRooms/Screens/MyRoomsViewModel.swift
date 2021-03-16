@@ -120,7 +120,7 @@ final class MyRoomsCellViewModelImplementation: MyRoomsCellViewModel, Hashable {
     }
 
     func loadRoomInfo() {
-        title.value = room.name
-        subtitle.value = room.isLive == true ? "live" : "non-live"
+        title.value = room.title
+//        subtitle.value = room.isLive == true ? "live" : "non-live"
     }
 }

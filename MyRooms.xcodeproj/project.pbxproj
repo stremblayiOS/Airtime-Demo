@@ -26,6 +26,9 @@
 		2229821C25D6DEFE00B17A34 /* MyRoomsLiveViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2229821B25D6DEFE00B17A34 /* MyRoomsLiveViewController.swift */; };
 		2229826925D6FAEE00B17A34 /* Room+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2229826725D6FAEE00B17A34 /* Room+CoreDataClass.swift */; };
 		2229826A25D6FAEE00B17A34 /* Room+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2229826825D6FAEE00B17A34 /* Room+CoreDataProperties.swift */; };
+		224A7BBA25FFB654008D1BBD /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224A7BB825FFB654008D1BBD /* KeychainService.swift */; };
+		224A7BBB25FFB654008D1BBD /* TokenStoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224A7BB925FFB654008D1BBD /* TokenStoreService.swift */; };
+		224A7BC725FFBEB7008D1BBD /* Bundle+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 224A7BC625FFBEB7008D1BBD /* Bundle+Extension.swift */; };
 		2282148E25D6CDC400A509FD /* RoomDataAccessRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2282148D25D6CDC400A509FD /* RoomDataAccessRequest.swift */; };
 		2282149225D6CE0B00A509FD /* RoomRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2282149125D6CE0B00A509FD /* RoomRouter.swift */; };
 		2284AD4425DC0FE7005EE4AD /* DataAccessError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2284AD4325DC0FE7005EE4AD /* DataAccessError.swift */; };
@@ -58,13 +61,20 @@
 		2229821B25D6DEFE00B17A34 /* MyRoomsLiveViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRoomsLiveViewController.swift; sourceTree = "<group>"; };
 		2229826725D6FAEE00B17A34 /* Room+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Room+CoreDataClass.swift"; sourceTree = "<group>"; };
 		2229826825D6FAEE00B17A34 /* Room+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Room+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		224A7BB825FFB654008D1BBD /* KeychainService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
+		224A7BB925FFB654008D1BBD /* TokenStoreService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TokenStoreService.swift; sourceTree = "<group>"; };
+		224A7BC625FFBEB7008D1BBD /* Bundle+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Bundle+Extension.swift"; sourceTree = "<group>"; };
 		2282148D25D6CDC400A509FD /* RoomDataAccessRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomDataAccessRequest.swift; sourceTree = "<group>"; };
 		2282149125D6CE0B00A509FD /* RoomRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomRouter.swift; sourceTree = "<group>"; };
 		2284AD4325DC0FE7005EE4AD /* DataAccessError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataAccessError.swift; sourceTree = "<group>"; };
 		2284AD9025E04257005EE4AD /* NSManagedObjectContext+Publisher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSManagedObjectContext+Publisher.swift"; sourceTree = "<group>"; };
 		22E73A0B25F2A35400BD2184 /* rooms.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = rooms.json; sourceTree = "<group>"; };
+		4875B917CE67D68C4B8F1577 /* Pods-MyRooms.debug - development.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MyRooms.debug - development.xcconfig"; path = "Target Support Files/Pods-MyRooms/Pods-MyRooms.debug - development.xcconfig"; sourceTree = "<group>"; };
+		6528E68E01C6B9C24FACD565 /* Pods-MyRooms.release - development.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MyRooms.release - development.xcconfig"; path = "Target Support Files/Pods-MyRooms/Pods-MyRooms.release - development.xcconfig"; sourceTree = "<group>"; };
+		9D1A4350270792A8DF69667F /* Pods-MyRooms.release - production.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MyRooms.release - production.xcconfig"; path = "Target Support Files/Pods-MyRooms/Pods-MyRooms.release - production.xcconfig"; sourceTree = "<group>"; };
 		AC28663FDBBA4CE57BC37A5A /* Pods_MyRooms.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MyRooms.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3BC856F12EB193DC2B00A78 /* Pods-MyRooms.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MyRooms.debug.xcconfig"; path = "Target Support Files/Pods-MyRooms/Pods-MyRooms.debug.xcconfig"; sourceTree = "<group>"; };
+		D3C1CE293A5CC8A080AE1C86 /* Pods-MyRooms.debug - production.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MyRooms.debug - production.xcconfig"; path = "Target Support Files/Pods-MyRooms/Pods-MyRooms.debug - production.xcconfig"; sourceTree = "<group>"; };
 		DE2B4E9425F67AC200E8541D /* MyRoomsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRoomsViewModel.swift; sourceTree = "<group>"; };
 		DE2B4E9725F67B0400E8541D /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
 		FFDD44953827BEBA44BB8A59 /* Pods-MyRooms.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MyRooms.release.xcconfig"; path = "Target Support Files/Pods-MyRooms/Pods-MyRooms.release.xcconfig"; sourceTree = "<group>"; };
@@ -111,6 +121,7 @@
 				22295DB025D6BA06000FBA25 /* Networking */,
 				22295DAA25D6BA06000FBA25 /* Services */,
 				DE2B4E9A25F67B1B00E8541D /* Localization */,
+				224A7BC925FFBEBA008D1BBD /* Extensions */,
 				22295D9825D6B6A0000FBA25 /* Assets.xcassets */,
 				22295D9D25D6B6A0000FBA25 /* LaunchScreen.storyboard */,
 				22295DA025D6B6A0000FBA25 /* Info.plist */,
@@ -145,6 +156,8 @@
 				2284AD4325DC0FE7005EE4AD /* DataAccessError.swift */,
 				22295DAE25D6BA06000FBA25 /* DatabaseService.swift */,
 				22295DAB25D6BA06000FBA25 /* APIService.swift */,
+				224A7BB825FFB654008D1BBD /* KeychainService.swift */,
+				224A7BB925FFB654008D1BBD /* TokenStoreService.swift */,
 				22295DAD25D6BA06000FBA25 /* ServiceFactory.swift */,
 				22295DAF25D6BA06000FBA25 /* Bootstrapper.swift */,
 				2284AD9025E04257005EE4AD /* NSManagedObjectContext+Publisher.swift */,
@@ -174,6 +187,14 @@
 			path = Screens;
 			sourceTree = "<group>";
 		};
+		224A7BC925FFBEBA008D1BBD /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				224A7BC625FFBEB7008D1BBD /* Bundle+Extension.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		5C8A222C262590F9BF1CEDCA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -187,6 +208,10 @@
 			children = (
 				C3BC856F12EB193DC2B00A78 /* Pods-MyRooms.debug.xcconfig */,
 				FFDD44953827BEBA44BB8A59 /* Pods-MyRooms.release.xcconfig */,
+				D3C1CE293A5CC8A080AE1C86 /* Pods-MyRooms.debug - production.xcconfig */,
+				4875B917CE67D68C4B8F1577 /* Pods-MyRooms.debug - development.xcconfig */,
+				9D1A4350270792A8DF69667F /* Pods-MyRooms.release - production.xcconfig */,
+				6528E68E01C6B9C24FACD565 /* Pods-MyRooms.release - development.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -315,13 +340,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				2284AD9125E04257005EE4AD /* NSManagedObjectContext+Publisher.swift in Sources */,
+				224A7BC725FFBEB7008D1BBD /* Bundle+Extension.swift in Sources */,
 				22295D9025D6B69F000FBA25 /* AppDelegate.swift in Sources */,
 				22295DB825D6BA06000FBA25 /* APIService.swift in Sources */,
 				22295DC125D6BA06000FBA25 /* RouterProtocol.swift in Sources */,
 				22295D9225D6B69F000FBA25 /* SceneDelegate.swift in Sources */,
 				2282149225D6CE0B00A509FD /* RoomRouter.swift in Sources */,
 				22295D9725D6B69F000FBA25 /* MyRooms.xcdatamodeld in Sources */,
+				224A7BBA25FFB654008D1BBD /* KeychainService.swift in Sources */,
 				22295DBB25D6BA06000FBA25 /* DatabaseService.swift in Sources */,
+				224A7BBB25FFB654008D1BBD /* TokenStoreService.swift in Sources */,
 				2229821625D6DEA900B17A34 /* TabbarViewController.swift in Sources */,
 				22295DBE25D6BA06000FBA25 /* DataAccessRequest.swift in Sources */,
 				2229826925D6FAEE00B17A34 /* Room+CoreDataClass.swift in Sources */,
@@ -353,10 +381,11 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		22295DA125D6B6A0000FBA25 /* Debug */ = {
+		224A7BBD25FFBDE8008D1BBD /* Debug - Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				API_BASE_URL = "https://deathstar-staging.signal.is";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -412,12 +441,34 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
-			name = Debug;
+			name = "Debug - Development";
 		};
-		22295DA225D6B6A0000FBA25 /* Release */ = {
+		224A7BBE25FFBDE8008D1BBD /* Debug - Development */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4875B917CE67D68C4B8F1577 /* Pods-MyRooms.debug - development.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"MyRooms/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = MyRooms/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.MyRooms;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Debug - Development";
+		};
+		224A7BBF25FFBDF1008D1BBD /* Release - Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				API_BASE_URL = "https://deathstar-staging.signal.is";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -467,11 +518,11 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
 			};
-			name = Release;
+			name = "Release - Development";
 		};
-		22295DA425D6B6A0000FBA25 /* Debug */ = {
+		224A7BC025FFBDF1008D1BBD /* Release - Development */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C3BC856F12EB193DC2B00A78 /* Pods-MyRooms.debug.xcconfig */;
+			baseConfigurationReference = 6528E68E01C6B9C24FACD565 /* Pods-MyRooms.release - development.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -488,11 +539,73 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
-			name = Debug;
+			name = "Release - Development";
 		};
-		22295DA525D6B6A0000FBA25 /* Release */ = {
+		224A7BC125FFBDFC008D1BBD /* Debug - Production */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = FFDD44953827BEBA44BB8A59 /* Pods-MyRooms.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				API_BASE_URL = "https://deathstar.signal.is";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = "Debug - Production";
+		};
+		224A7BC225FFBDFC008D1BBD /* Debug - Production */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D3C1CE293A5CC8A080AE1C86 /* Pods-MyRooms.debug - production.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -509,7 +622,84 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
-			name = Release;
+			name = "Debug - Production";
+		};
+		224A7BC325FFBE08008D1BBD /* Release - Production */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				API_BASE_URL = "https://deathstar.signal.is";
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = "Release - Production";
+		};
+		224A7BC425FFBE08008D1BBD /* Release - Production */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9D1A4350270792A8DF69667F /* Pods-MyRooms.release - production.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"MyRooms/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = MyRooms/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.MyRooms;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = "Release - Production";
 		};
 /* End XCBuildConfiguration section */
 
@@ -517,20 +707,24 @@
 		22295D8725D6B69F000FBA25 /* Build configuration list for PBXProject "MyRooms" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				22295DA125D6B6A0000FBA25 /* Debug */,
-				22295DA225D6B6A0000FBA25 /* Release */,
+				224A7BC125FFBDFC008D1BBD /* Debug - Production */,
+				224A7BBD25FFBDE8008D1BBD /* Debug - Development */,
+				224A7BC325FFBE08008D1BBD /* Release - Production */,
+				224A7BBF25FFBDF1008D1BBD /* Release - Development */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = "Debug - Production";
 		};
 		22295DA325D6B6A0000FBA25 /* Build configuration list for PBXNativeTarget "MyRooms" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				22295DA425D6B6A0000FBA25 /* Debug */,
-				22295DA525D6B6A0000FBA25 /* Release */,
+				224A7BC225FFBDFC008D1BBD /* Debug - Production */,
+				224A7BBE25FFBDE8008D1BBD /* Debug - Development */,
+				224A7BC425FFBE08008D1BBD /* Release - Production */,
+				224A7BC025FFBDF1008D1BBD /* Release - Development */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = "Debug - Production";
 		};
 /* End XCConfigurationList section */
 
