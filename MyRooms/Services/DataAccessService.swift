@@ -174,7 +174,7 @@ private extension DataAccessService {
                         // through the db when we save.
                         return nil
                     } else {
-                        let managedObjectContext = self.databaseService.managedObjectContext(.temporary)
+                        let managedObjectContext = self.databaseService.newBackgroundContext()
                         return results.compactMap {
                             self.databaseService.decodeObject(with: $0, managedObjectContext: managedObjectContext)
                         }
