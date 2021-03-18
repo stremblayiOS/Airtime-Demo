@@ -51,7 +51,7 @@ final class MyRoomsCellViewModelImplementation: MyRoomsCellViewModel, Hashable {
     }
 
     func loadRoomInfo() {
-        title.value = room.name
-        subtitle.value = room.isLive == true ? MyRoomsCellKeys.live.localized : MyRoomsCellKeys.notLive.localized
+        title.value = room.title
+        subtitle.value = room.live == true ? MyRoomsCellKeys.live.localized : MyRoomsCellKeys.notLive.localized
     }
 }

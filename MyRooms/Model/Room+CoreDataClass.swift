@@ -13,8 +13,8 @@ public class Room: NSManagedObject, Codable {
 
     enum CodingKeys: CodingKey {
         case id
-        case name
-        case isLive
+        case title
+        case live
     }
 
     required convenience public init(from decoder: Decoder) throws {
@@ -27,8 +27,8 @@ public class Room: NSManagedObject, Codable {
             let container = try decoder.container(keyedBy: CodingKeys.self)
 
             self.id = try container.decode(String.self, forKey: .id)
-            self.name = try container.decode(String.self, forKey: .name)
-            self.isLive = try container.decode(Bool.self, forKey: .isLive)
+            self.title = try container.decode(String.self, forKey: .title)
+            self.live = try container.decode(Bool.self, forKey: .live)
         } catch {
             print(error.localizedDescription)
         }
@@ -38,8 +38,8 @@ public class Room: NSManagedObject, Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         try container.encode(id, forKey: .id)
-        try container.encode(name, forKey: .name)
-        try container.encode(isLive, forKey: .isLive)
+        try container.encode(title, forKey: .title)
+        try container.encode(live, forKey: .live)
     }
 }
 

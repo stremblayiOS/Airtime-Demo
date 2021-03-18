@@ -14,7 +14,14 @@ struct Bootstrapper {
     
     init() {
         container.register(DatabaseServiceProtocol.self) { _ in DatabaseService() }
+        container.register(KeychainServiceProtocol.self) { _ in KeychainService(serviceIdentifier: "com.keychain.MyRooms") }
+        container.register(TokenStoreServiceProtocol.self) { resolver in
+            TokenStoreService(keychainService: resolver.resolve(KeychainServiceProtocol.self)!)
+        }
         container.register(APIServiceProtocol.self) { _ in APIService() }
+        container.register(AccessTokenAdapter.self) { resolver in
+            AccessTokenAdapter(tokenStoreService: resolver.resolve(TokenStoreServiceProtocol.self)!)
+        }
         container.register(DataAccessServiceProtocol.self) { resolver in
             DataAccessService(databaseService: resolver.resolve(DatabaseServiceProtocol.self)!,
                               apiService: resolver.resolve(APIServiceProtocol.self)!)

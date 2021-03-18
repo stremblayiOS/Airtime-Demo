@@ -128,39 +128,6 @@ final class DataAccessService: DataAccessServiceProtocol {
             return Publishers.Merge(local, remote).eraseToAnyPublisher()
         }
     }
-
-//    func getObjects<T>(request: DataAccessRequest) -> AnyPublisher<[T], DataAccessError> where T: Object, T: Codable {
-//        let subject = PassthroughSubject<[T], DataAccessError>()
-//
-//        if let localRequest = request.localRequest {
-//            databaseService.getObjects(predicate: localRequest.filter).sink { _ in
-//                subject.send(completion: .failure(.database))
-//            } receiveValue: { (objects: [T]) in
-//                subject.send(objects)
-//            }.store(in: &cancellableBag)
-//        }
-//
-//        if let remoteRequest = request.remoteRequest {
-//            apiService.dataRequest(for: remoteRequest).responseJSON { [weak self] response in
-//
-//                switch response.result {
-//                case .success(let result):
-//                    guard let result = result as? [[String: Any]] else { return }
-//
-//                    let objects: [T] = result.compactMap { self?.databaseService.decodeObject(with: $0) }
-//                    if let _ = request.localRequest {
-//                        self?.databaseService.save()
-//                    } else {
-//                        subject.send(objects)
-//                    }
-//                case .failure(let error):
-//                    subject.send(completion: .failure(.remote(error: error)))
-//                }
-//            }
-//        }
-//
-//        return subject.eraseToAnyPublisher()
-//    }
 }
 
 // MARK: - Get Objects Publishers
@@ -178,6 +145,7 @@ private extension DataAccessService {
     func getObjectsPublisher<T>(for remoteRequest: RemoteRequest, dataAccessRequest: DataAccessRequest) -> AnyPublisher<[T], DataAccessError> where T: Object, T: Codable {
         apiService
             .dataRequest(for: remoteRequest)
+            .validate()
             .publishResponse(using: JSONResponseSerializer())
             // We are decoding here and then again on the next step, we should only get the Data here and
             // decode from data once on the next step. we could even use the .decode() function in Combine.
@@ -186,22 +154,30 @@ private extension DataAccessService {
 
                 switch response.result {
                 case .success(let result):
-                    guard let result = result as? [[String: Any]] else { throw DataAccessError.remoteResponseUnexpected }
+                    // TODO: configure keypath in the data access request
+                    guard
+                        let result = result as? [String: Any],
+                        let results = result["results"] as? [[String: Any]]
+                    else {
+                        throw DataAccessError.remoteResponseUnexpected
+                    }
 
                     if let _ = dataAccessRequest.localRequest {
                         let managedObjectContext = self.databaseService.managedObjectContext(.background)
                         managedObjectContext.performAndWait {
-                            let _: [T] = result.compactMap {
+                            let _: [T] = results.compactMap {
                                 self.databaseService.decodeObject(with: $0, managedObjectContext: managedObjectContext)
                             }
                             self.databaseService.save(managedObjectContext: managedObjectContext)
+                            // TODO: find a better way to save the parent
+                            self.databaseService.save(managedObjectContext: self.databaseService.managedObjectContext(.main))
                         }
                         // Don't send values as the local request should already be observing changes
                         // through the db when we save.
                         return nil
                     } else {
-                        let managedObjectContext = self.databaseService.managedObjectContext(.temporary)
-                        return result.compactMap {
+                        let managedObjectContext = self.databaseService.newBackgroundContext()
+                        return results.compactMap {
                             self.databaseService.decodeObject(with: $0, managedObjectContext: managedObjectContext)
                         }
                     }

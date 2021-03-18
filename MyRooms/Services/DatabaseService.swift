@@ -26,6 +26,10 @@ protocol DatabaseServiceProtocol {
 
     func managedObjectContext(_ contextType: DatabaseService.ContextType) -> NSManagedObjectContext
 
+    func newBackgroundContext() -> NSManagedObjectContext
+
+    func performBackgroundTask(_ block: @escaping (NSManagedObjectContext) -> Void)
+
     /// Function to save the context if there is any changes to save
     ///
     func save(managedObjectContext: NSManagedObjectContext)
@@ -72,7 +76,11 @@ final class DatabaseService: DatabaseServiceProtocol {
         return container
     }()
 
-    private lazy var managedObjectContext: NSManagedObjectContext = persistentContainer.viewContext
+    private lazy var managedObjectContext: NSManagedObjectContext = {
+        let managedObjectContext = persistentContainer.viewContext
+        managedObjectContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        return managedObjectContext
+    }()
 
     private lazy var backgroundManagedObjectContext: NSManagedObjectContext = {
         let managedObjectContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
@@ -123,6 +131,14 @@ final class DatabaseService: DatabaseServiceProtocol {
             case .temporary:
                 return temporaryManagedObjectContext
         }
+    }
+
+    func newBackgroundContext() -> NSManagedObjectContext {
+        persistentContainer.newBackgroundContext()
+    }
+
+    func performBackgroundTask(_ block: @escaping (NSManagedObjectContext) -> Void) {
+        persistentContainer.performBackgroundTask(block)
     }
 
     func getObject<T: Object>(id: String) -> Result<T, NSError> {

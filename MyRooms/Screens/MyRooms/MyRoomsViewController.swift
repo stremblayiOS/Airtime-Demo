@@ -154,8 +154,7 @@ private extension MyRoomsViewController {
         // 1. Create the object and set paramaters
         let room = dataAccessService.createObject(Room.self)
         room.id = UUID().uuidString
-        room.name = UUID().uuidString
-        room.isLive = Bool.random()
+        room.title = UUID().uuidString
 
         // 2. Create the request
         let request = RoomDataAccessRequest.create(room: room)

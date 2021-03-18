@@ -48,8 +48,8 @@ final class MyRoomsLiveViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "")
 
-        cell.textLabel?.text = rooms[indexPath.row].name
-        cell.detailTextLabel?.text = rooms[indexPath.row].isLive == true ? "live" : "non-live"
+        cell.textLabel?.text = rooms[indexPath.row].title
+//        cell.detailTextLabel?.text = rooms[indexPath.row].isLive == true ? "live" : "non-live"
 
         return cell
     }

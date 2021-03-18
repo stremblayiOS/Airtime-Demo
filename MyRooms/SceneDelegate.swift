@@ -25,11 +25,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 //        // Add `@Environment(\.managedObjectContext)` in the views that will need the context.
 //        let contentView = ContentView().environment(\.managedObjectContext, context)
 
-        stub(condition: isPath(RoomRouter.rooms.route().path)) { _ in
-          // Stub it with our "wsresponse.json" stub file (which is in same bundle as self)
-          let stubPath = OHPathForFile("rooms.json", type(of: self))
-          return fixture(filePath: stubPath!, headers: ["Content-Type":"application/json"])
-        }
+//        stub(condition: isPath(RoomRouter.rooms.route().path)) { _ in
+//          // Stub it with our "wsresponse.json" stub file (which is in same bundle as self)
+//          let stubPath = OHPathForFile("rooms.json", type(of: self))
+//          return fixture(filePath: stubPath!, headers: ["Content-Type":"application/json"])
+//        }
 
         // Use a UIHostingController as window root view controller.
         if let windowScene = scene as? UIWindowScene {

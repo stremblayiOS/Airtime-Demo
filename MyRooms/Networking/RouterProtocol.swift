@@ -24,7 +24,7 @@ protocol RouterProtocol {
 extension RouterProtocol {
     
     func baseUrl() throws -> URL {
-        guard let baseUrl = URL(string: "http://www.airtime.com") else {
+        guard let urlString = Bundle.baseUrlString, let baseUrl = URL(string: urlString) else {
             throw NSError(domain: "", code: 0, userInfo: [:])
         }
         return baseUrl

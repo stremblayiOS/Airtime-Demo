@@ -17,8 +17,8 @@ extension Room {
     }
 
     @NSManaged public var id: String
-    @NSManaged public var isLive: Bool
-    @NSManaged public var name: String
+    @NSManaged public var title: String
+    @NSManaged public var live: Bool
 }
 
 extension Room: Identifiable {
