@@ -65,7 +65,7 @@ final class MyRoomsViewModelImplementation: MyRoomsViewModel {
             .getObjects(type: Room.self, request: RoomDataAccessRequest.myRooms)
             .trackLoading(to: \.isLoading.value, onWeak: self)
             .trackLocalizableErrorDescription(to: \.localizedErrorMessage.value, onWeak: self)
-            .map { $0.compactMap { MyRoomsCellViewModelImplementation(room: $0) } } //TODO: handle with DI
+            .map { $0.compactMap { ServiceFactory.resolve(serviceType: MyRoomsCellViewModel.self, argument: $0) } }
             .sink(receiveCompletion: { _ in
 
             }, receiveValue: { [weak self] cellViewModels in

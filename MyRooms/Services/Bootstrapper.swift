@@ -29,8 +29,16 @@ struct Bootstrapper {
         container.register(TabbarViewController.self) { resolver in
             TabbarViewController(dataAccessService: resolver.resolve(DataAccessServiceProtocol.self)!)
         }
+
+        container.register(MyRoomsViewModel.self) { resolver in
+            MyRoomsViewModelImplementation(dataAccessService: resolver.resolve(DataAccessServiceProtocol.self)!)
+        }
         container.register(MyRoomsViewController.self) { resolver in
-            MyRoomsViewController(dataAccessService: resolver.resolve(DataAccessServiceProtocol.self)!)
+            MyRoomsViewController(dataAccessService: resolver.resolve(DataAccessServiceProtocol.self)!,
+                                  viewModel: resolver.resolve(MyRoomsViewModel.self)!)
+        }
+        container.register(MyRoomsCellViewModel.self) { (r, arg: Room) -> MyRoomsCellViewModelImplementation in
+            MyRoomsCellViewModelImplementation(room: arg)
         }
         container.register(MyRoomsLiveViewController.self) { resolver in
             MyRoomsLiveViewController(dataAccessService: resolver.resolve(DataAccessServiceProtocol.self)!)

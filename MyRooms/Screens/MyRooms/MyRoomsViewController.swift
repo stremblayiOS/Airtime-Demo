@@ -18,25 +18,14 @@ final class MyRoomsViewController: UITableViewController {
     private var dataSource: DataSource!
     var snapshot = DataSourceSnapshot()
 
-    private var rooms: [Room] = [] {
-        didSet {
-            tableView.reloadData()
-        }
-    }
-
     private var viewModel: MyRoomsViewModel
 
     private var cancellables = Set<AnyCancellable>()
 
-    init(dataAccessService: DataAccessServiceProtocol) {
+    init(dataAccessService: DataAccessServiceProtocol, viewModel: MyRoomsViewModel) {
         self.dataAccessService = dataAccessService
-
-        self.viewModel = MyRoomsViewModelImplementation(dataAccessService: dataAccessService) //TODO: move to DI
-
+        self.viewModel = viewModel
         super.init(style: .plain)
-
-        title = "My Rooms"
-
     }
 
     required init?(coder: NSCoder) {

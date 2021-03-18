@@ -38,9 +38,7 @@ final class MyRoomsCellViewModelImplementation: MyRoomsCellViewModel, Hashable {
     private var room: Room
     private var cancellable: AnyCancellable?
 
-    init?(room: Room? = nil) {
-
-        guard let room = room else { return nil }
+    init(room: Room) {
 
         self.room = room
 
